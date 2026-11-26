@@ -27,11 +27,18 @@ namespace gps {
             vertices.push_back(glm::vec3(around * endRadius, length));
         }
 
+        GLuint startCenter = (GLuint)vertices.size();
+        vertices.push_back(glm::vec3(0.0f));
+        GLuint endCenter = (GLuint)vertices.size();
+        vertices.push_back(glm::vec3(0.0f, 0.0f, length));
+
         std::vector<GLuint> indices;
         for(int i = 0; i < segments; i++)
         {
             GLuint start = 2 * i;
             indices.insert(indices.end(), {start, start + 2, start + 1, start + 1, start + 2, start + 3});
+            indices.insert(indices.end(), {startCenter, start + 2, start});
+            indices.insert(indices.end(), {endCenter, start + 1, start + 3});
         }
         indexCount = (GLsizei)indices.size();
 

@@ -4,6 +4,7 @@
 
 #include "lights.glsl"
 #include "fog.glsl"
+#include "shadows.glsl"
 
 in vec3 fWorldPosition;
 in vec3 fNormal;
@@ -70,11 +71,13 @@ void main()
     vec3 reflection = texture(skybox, reflected).rgb * mix(0.85, 0.5, stormFactor);
 
     vec3 toMoon = normalize(moon.direction);
-    vec3 body = DEEP_COLOR + moon.ambient * 0.25 + moon.color * 0.02 * max(dot(normal, toMoon), 0.0);
+    vec3 up = vec3(0.0, 1.0, 0.0);
+    float moonLit = moonShadow(fWorldPosition, up);
+    vec3 body = DEEP_COLOR + moon.ambient * 0.25 + moon.color * 0.02 * moonLit * max(dot(normal, toMoon), 0.0);
     vec3 color = mix(body, reflection, fresnel);
 
     vec3 halfway = normalize(toMoon + viewDirection);
-    color += moon.color * pow(max(dot(normal, halfway), 0.0), mix(1400.0, 350.0, stormFactor)) * mix(5.0, 2.0, stormFactor);
+    color += moon.color * moonLit * pow(max(dot(normal, halfway), 0.0), mix(1400.0, 350.0, stormFactor)) * mix(5.0, 2.0, stormFactor);
 
     for(int i = 0; i < pointLightCount; i++)
     {
@@ -89,7 +92,7 @@ void main()
     vec3 toBeam = beam.position - fWorldPosition;
     float beamDistance = length(toBeam);
     vec3 beamDirection = toBeam / beamDistance;
-    float cone = beamCone(beamDirection);
+    float cone = beamCone(beamDirection) * beamShadow(fWorldPosition, up);
     float beamFalloff = attenuation(beamDistance, beam.constant, beam.linear, beam.quadratic);
     vec3 beamHalfway = normalize(beamDirection + viewDirection);
     color += cone * beamFalloff * beam.color * (0.04 + 1.5 * pow(max(dot(normal, beamHalfway), 0.0), 80.0));
@@ -106,7 +109,7 @@ void main()
     foam = clamp(foam * smoothstep(0.12, 0.45, pattern) * 1.4, 0.0, 1.0);
     foam *= 1.0 - smoothstep(60.0, 200.0, fDistance);
 
-    vec3 foamLight = moon.ambient * 4.0 + moon.color * max(dot(normal, toMoon), 0.2) + cone * beamFalloff * beam.color * 0.6;
+    vec3 foamLight = moon.ambient * 4.0 + moon.color * moonLit * max(dot(normal, toMoon), 0.2) + cone * beamFalloff * beam.color * 0.6;
     color = mix(color, FOAM_COLOR * foamLight, foam);
 
     vec3 horizonDirection = normalize(vec3(-viewDirection.x, 0.0, -viewDirection.z));

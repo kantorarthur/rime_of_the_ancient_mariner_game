@@ -2,6 +2,7 @@
 
 #include "lights.glsl"
 #include "fog.glsl"
+#include "shadows.glsl"
 
 in vec3 fWorldPosition;
 in vec3 fNormal;
@@ -47,7 +48,7 @@ void main()
         normal = -normal;
 
     vec3 color = moon.ambient * albedo;
-    color += shade(normalize(moon.direction), moon.color, normal, viewDirection, albedo, specularColor);
+    color += moonShadow(fWorldPosition, normal) * shade(normalize(moon.direction), moon.color, normal, viewDirection, albedo, specularColor);
 
     for(int i = 0; i < pointLightCount; i++)
     {
@@ -61,7 +62,7 @@ void main()
     float beamDistance = length(toBeam);
     vec3 beamDirection = toBeam / beamDistance;
     float beamFalloff = attenuation(beamDistance, beam.constant, beam.linear, beam.quadratic);
-    color += beamCone(beamDirection) * beamFalloff * shade(beamDirection, beam.color, normal, viewDirection, albedo, specularColor);
+    color += beamCone(beamDirection) * beamFalloff * beamShadow(fWorldPosition, normal) * shade(beamDirection, beam.color, normal, viewDirection, albedo, specularColor);
 
     color += texture(emissiveTexture, fTexCoords).rgb * emissiveStrength;
 

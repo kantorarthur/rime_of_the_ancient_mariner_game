@@ -24,6 +24,14 @@ namespace gps {
     const float BEAM_SHAFT_RADIUS = 0.6f;
     const float BEAM_SHAFT_SPREAD = 4.5f;
 
+    const int MOON_SHADOW_SIZE = 4096;
+    const int BEAM_SHADOW_SIZE = 2048;
+    const glm::vec3 MOON_SHADOW_CENTER = glm::vec3(-3.0f, 0.0f, 10.0f);
+    const float MOON_SHADOW_RADIUS = 62.0f;
+    const float MOON_SHADOW_DISTANCE = 150.0f;
+    const GLuint MOON_SHADOW_UNIT = 5;
+    const GLuint BEAM_SHADOW_UNIT = 6;
+
     const glm::vec3 CALM_MOON_DIRECTION = glm::vec3(0.378f, 0.378f, -0.845f);
     const glm::vec3 STORM_MOON_DIRECTION = glm::vec3(0.399f, 0.227f, -0.888f);
 
@@ -52,6 +60,8 @@ namespace gps {
         updateFloating();
         fog.update(0.0f, stormFactor);
         lightBeam.init(BEAM_SHAFT_LENGTH, BEAM_SHAFT_RADIUS, BEAM_SHAFT_SPREAD, 48);
+        moonShadowMap.init(MOON_SHADOW_SIZE);
+        beamShadowMap.init(BEAM_SHADOW_SIZE);
     }
 
     void Scene::loadModels()
@@ -240,14 +250,58 @@ namespace gps {
         beam.direction = glm::vec3(std::cos(angle), BEAM_TILT, std::sin(angle));
     }
 
+    void Scene::updateLightSpaces()
+    {
+        glm::vec3 toMoon = glm::normalize(moon.direction);
+        glm::mat4 moonView = glm::lookAt(MOON_SHADOW_CENTER + toMoon * MOON_SHADOW_DISTANCE, MOON_SHADOW_CENTER, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 moonProjection = glm::ortho(-MOON_SHADOW_RADIUS, MOON_SHADOW_RADIUS, -MOON_SHADOW_RADIUS, MOON_SHADOW_RADIUS, 1.0f, 2.0f * MOON_SHADOW_DISTANCE);
+        moonLightSpace = moonProjection * moonView;
+
+        glm::vec3 beamDirection = glm::normalize(beam.direction);
+        glm::mat4 beamView = glm::lookAt(beam.position, beam.position + beamDirection, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 beamProjection = glm::perspective(glm::radians(2.0f * beam.outerCutOffDegrees + 4.0f), 1.0f, 0.5f, 250.0f);
+        beamLightSpace = beamProjection * beamView;
+    }
+
+    void Scene::drawDepth(gps::Shader depthShader, gps::ShadowMap& shadowMap, glm::mat4 lightSpace, bool includeLighthouse)
+    {
+        GLint modelLoc = glGetUniformLocation(depthShader.shaderProgram, "model");
+        glUniformMatrix4fv(glGetUniformLocation(depthShader.shaderProgram, "lightSpace"), 1, GL_FALSE, glm::value_ptr(lightSpace));
+
+        shadowMap.begin();
+        for(SceneObject& object : objects)
+        {
+            if(!includeLighthouse && object.model == &lighthouse)
+                continue;
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(object.getModelMatrix()));
+            object.model->Draw(depthShader);
+        }
+        shadowMap.end();
+    }
+
+    void Scene::renderShadows(gps::Shader depthShader)
+    {
+        updateLightSpaces();
+        depthShader.useShaderProgram();
+        drawDepth(depthShader, moonShadowMap, moonLightSpace, true);
+        drawDepth(depthShader, beamShadowMap, beamLightSpace, false);
+    }
+
     void Scene::uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition)
     {
         shader.useShaderProgram();
-        uploadDirectionalLight(shader.shaderProgram, "moon", moon);
-        uploadPointLights(shader.shaderProgram, pointLights);
-        uploadSpotLight(shader.shaderProgram, "beam", beam);
+        GLuint program = shader.shaderProgram;
+        uploadDirectionalLight(program, "moon", moon);
+        uploadPointLights(program, pointLights);
+        uploadSpotLight(program, "beam", beam);
         fog.upload(shader);
-        glUniform3fv(glGetUniformLocation(shader.shaderProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+        glUniform3fv(glGetUniformLocation(program, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+
+        glUniformMatrix4fv(glGetUniformLocation(program, "moonLightSpace"), 1, GL_FALSE, glm::value_ptr(moonLightSpace));
+        glUniformMatrix4fv(glGetUniformLocation(program, "beamLightSpace"), 1, GL_FALSE, glm::value_ptr(beamLightSpace));
+        glUniform2f(glGetUniformLocation(program, "shadowTexelSize"), 1.0f / moonShadowMap.getSize(), 1.0f / beamShadowMap.getSize());
+        moonShadowMap.bind(program, "moonShadowMap", MOON_SHADOW_UNIT);
+        beamShadowMap.bind(program, "beamShadowMap", BEAM_SHADOW_UNIT);
     }
 
     void Scene::drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture)

@@ -52,6 +52,7 @@ gps::Shader myBasicShader;
 gps::Shader skyboxShader;
 gps::Shader waterShader;
 gps::Shader beamShader;
+gps::Shader depthShader;
 
 GLenum glCheckError_(const char* file, int line)
 {
@@ -220,6 +221,7 @@ void initShaders()
     skyboxShader.loadShader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
     waterShader.loadShader("assets/shaders/water.vert", "assets/shaders/water.frag");
     beamShader.loadShader("assets/shaders/beam.vert", "assets/shaders/beam.frag");
+    depthShader.loadShader("assets/shaders/shadow.vert", "assets/shaders/shadow.frag");
 }
 
 void initUniforms()
@@ -240,6 +242,10 @@ void initUniforms()
 
 void renderScene()
 {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    scene.renderShadows(depthShader);
+    glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     viewMode.apply();

@@ -36,7 +36,7 @@ Run the program from the project root, since the paths to `assets/` are relative
 ## Project layout
 
 - `src/core`: window and input
-- `src/graphics`: shaders, meshes, models, lights, view modes
+- `src/graphics`: shaders, meshes, models, lights, shadow maps, view modes
 - `src/scene`: camera, skybox, water, fog, lighthouse beam and scene layout
 - `external`: stb_image, tinyobjloader
 - `assets`: models, skyboxes and shaders loaded at runtime

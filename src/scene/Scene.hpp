@@ -4,6 +4,7 @@
 #include "graphics/Lights.hpp"
 #include "graphics/Model3D.hpp"
 #include "graphics/Shader.hpp"
+#include "graphics/ShadowMap.hpp"
 #include "scene/Fog.hpp"
 #include "scene/LightBeam.hpp"
 #include "scene/Water.hpp"
@@ -40,6 +41,7 @@ namespace gps {
         void load();
         void update(float deltaTime);
         void draw(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc, GLint emissiveLoc);
+        void renderShadows(gps::Shader depthShader);
         void uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition);
         void drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture);
         void drawBeam(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
@@ -69,6 +71,10 @@ namespace gps {
         gps::Water water;
         gps::Fog fog;
         gps::LightBeam lightBeam;
+        gps::ShadowMap moonShadowMap;
+        gps::ShadowMap beamShadowMap;
+        glm::mat4 moonLightSpace = glm::mat4(1.0f);
+        glm::mat4 beamLightSpace = glm::mat4(1.0f);
 
         Weather weather = Weather::Storm;
         float stormFactor = 1.0f;
@@ -80,6 +86,8 @@ namespace gps {
         void applyWeather();
         void placeFoam();
         void updateFloating();
+        void updateLightSpaces();
+        void drawDepth(gps::Shader depthShader, gps::ShadowMap& shadowMap, glm::mat4 lightSpace, bool includeLighthouse);
         void setFloating(SceneObject& object, float draft, float length, float width);
         SceneObject& add(gps::Model3D& model, glm::vec3 position, float rotationY, float scale);
         glm::vec3 onCircle(float angleDegrees, float radius, float height);
