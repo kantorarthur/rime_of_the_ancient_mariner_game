@@ -51,6 +51,7 @@ int stormSky = 0;
 
 gps::Shader myBasicShader;
 gps::Shader skyboxShader;
+gps::Shader waterShader;
 
 GLenum glCheckError_(const char* file, int line)
 {
@@ -84,7 +85,7 @@ GLenum glCheckError_(const char* file, int line)
 
 void updateProjection(int width, int height)
 {
-    projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 300.0f);
+    projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.2f, 2000.0f);
     myBasicShader.useShaderProgram();
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
@@ -210,6 +211,7 @@ void initShaders()
 {
     myBasicShader.loadShader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
     skyboxShader.loadShader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
+    waterShader.loadShader("assets/shaders/water.vert", "assets/shaders/water.frag");
 }
 
 void initUniforms()
@@ -243,6 +245,7 @@ void renderScene()
 
     scene.uploadLights(myBasicShader);
     scene.draw(myBasicShader, modelLoc, normalMatrixLoc, emissiveLoc);
+    scene.drawWater(waterShader, view, projection, myCamera.getPosition(), skybox.getSelectedTexture());
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     skybox.draw(skyboxShader, view, projection, 1.0f);

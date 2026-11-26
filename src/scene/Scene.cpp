@@ -40,11 +40,17 @@ namespace gps {
         placeObjects();
         placeLights();
         applyWeather();
+
+        water.init(220, 256, 1500.0f);
+        placeFoam();
+        if(weather == Weather::Calm)
+            stormFactor = 0.0f;
+        water.update(0.0f, stormFactor);
+        updateFloating();
     }
 
     void Scene::loadModels()
     {
-        sea.LoadModel("assets/models/sea/sea.obj");
         island.LoadModel("assets/models/island/island.obj");
         cliffRing.LoadModel("assets/models/cliff/cliff_ring.obj");
         lighthouse.LoadModel("assets/models/lighthouse/lighthouse.obj");
@@ -61,7 +67,6 @@ namespace gps {
 
     void Scene::placeObjects()
     {
-        add(sea, glm::vec3(0.0f), 0.0f, 1.0f);
         add(island, glm::vec3(0.0f), 0.0f, 1.0f);
 
         add(cliffRing, glm::vec3(0.0f), 0.0f, 1.0f);
@@ -80,16 +85,16 @@ namespace gps {
         add(lantern, pierEnd + pierSide * 0.9f, 0.0f, 1.0f).emissiveStrength = 1.5f;
 
         glm::vec3 boatPosition = onCircle(PIER_ANGLE, 28.0f, -0.3f) - pierSide * 3.0f;
-        add(boat, boatPosition, PIER_ANGLE + 180.0f, 1.0f);
+        setFloating(add(boat, boatPosition, PIER_ANGLE + 180.0f, 1.0f), 0.3f, 4.4f, 1.8f);
 
         SceneObject& wreck = add(ship, glm::vec3(-46.0f, -5.5f, 18.0f), 65.0f, 1.0f);
         wreck.rotationDegrees.x = -7.0f;
         wreck.rotationDegrees.z = 21.0f;
 
-        add(crate, glm::vec3(-26.0f, -0.2f, 22.0f), 25.0f, 1.0f);
-        add(crate, glm::vec3(-16.0f, -0.2f, 40.0f), 70.0f, 1.0f);
-        add(crate, glm::vec3(8.0f, -0.2f, 36.0f), 140.0f, 1.0f);
-        add(crate, glm::vec3(-38.0f, -0.2f, -4.0f), 200.0f, 1.0f);
+        setFloating(add(crate, glm::vec3(-26.0f, 0.0f, 22.0f), 25.0f, 1.0f), 0.22f, 1.17f, 0.53f);
+        setFloating(add(crate, glm::vec3(-16.0f, 0.0f, 40.0f), 70.0f, 1.0f), 0.22f, 1.17f, 0.53f);
+        setFloating(add(crate, glm::vec3(8.0f, 0.0f, 36.0f), 140.0f, 1.0f), 0.22f, 1.17f, 0.53f);
+        setFloating(add(crate, glm::vec3(-38.0f, 0.0f, -4.0f), 200.0f, 1.0f), 0.22f, 1.17f, 0.53f);
 
         add(rocks[0], glm::vec3(-34.0f, -0.8f, 8.0f), 0.0f, 1.6f);
         add(rocks[1], glm::vec3(-42.0f, -1.0f, -10.0f), 50.0f, 2.2f);
@@ -160,8 +165,57 @@ namespace gps {
         return weather;
     }
 
+    void Scene::placeFoam()
+    {
+        water.addFoamCircle(glm::vec2(0.0f), 21.6f, 1.8f);
+        water.addFoamCircle(glm::vec2(-46.0f, 18.0f), 7.0f, 3.0f);
+
+        for(SceneObject& object : objects)
+        {
+            bool isRock = object.model == &rocks[0] || object.model == &rocks[1] || object.model == &rocks[2];
+            if(isRock && glm::length(glm::vec2(object.position.x, object.position.z)) > 25.0f)
+                water.addFoamCircle(glm::vec2(object.position.x, object.position.z), 1.25f * object.scale, 0.9f * object.scale);
+        }
+    }
+
+    void Scene::setFloating(SceneObject& object, float draft, float length, float width)
+    {
+        object.floatDraft = draft;
+        object.floatLength = length;
+        object.floatWidth = width;
+    }
+
+    void Scene::updateFloating()
+    {
+        for(SceneObject& object : objects)
+        {
+            if(object.floatLength <= 0.0f)
+                continue;
+
+            float yaw = glm::radians(object.rotationDegrees.y);
+            glm::vec3 forward = glm::vec3(-std::sin(yaw), 0.0f, -std::cos(yaw)) * (object.floatLength * 0.5f);
+            glm::vec3 right = glm::vec3(std::cos(yaw), 0.0f, -std::sin(yaw)) * (object.floatWidth * 0.5f);
+            glm::vec3 center = object.position;
+
+            float bow = water.heightAt(center.x + forward.x, center.z + forward.z);
+            float stern = water.heightAt(center.x - forward.x, center.z - forward.z);
+            float starboard = water.heightAt(center.x + right.x, center.z + right.z);
+            float port = water.heightAt(center.x - right.x, center.z - right.z);
+
+            object.position.y = (bow + stern + starboard + port) * 0.25f - object.floatDraft;
+            object.rotationDegrees.x = glm::degrees(std::atan2(bow - stern, object.floatLength));
+            object.rotationDegrees.z = glm::degrees(std::atan2(starboard - port, object.floatWidth));
+        }
+    }
+
     void Scene::update(float deltaTime)
     {
+        float target = weather == Weather::Storm ? 1.0f : 0.0f;
+        float step = 0.35f * deltaTime;
+        stormFactor += glm::clamp(target - stormFactor, -step, step);
+        water.update(deltaTime, stormFactor);
+        updateFloating();
+
         beamAngle += BEAM_SPEED_DEGREES * deltaTime;
         if(beamAngle >= 360.0f)
             beamAngle -= 360.0f;
@@ -176,6 +230,12 @@ namespace gps {
         uploadDirectionalLight(shader.shaderProgram, "moon", moon);
         uploadPointLights(shader.shaderProgram, pointLights);
         uploadSpotLight(shader.shaderProgram, "beam", beam);
+    }
+
+    void Scene::drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture)
+    {
+        uploadLights(shader);
+        water.draw(shader, view, projection, cameraPosition, skyboxTexture);
     }
 
     SceneObject& Scene::add(gps::Model3D& model, glm::vec3 position, float rotationY, float scale)

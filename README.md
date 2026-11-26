@@ -36,7 +36,7 @@ Run the program from the project root, since the paths to `assets/` are relative
 
 - `src/core`: window and input
 - `src/graphics`: shaders, meshes, models, lights, view modes
-- `src/scene`: camera, skybox and scene layout
+- `src/scene`: camera, skybox, water and scene layout
 - `external`: stb_image, tinyobjloader
 - `assets`: models, skyboxes and shaders loaded at runtime
 - `tools`: Blender and ImageMagick scripts that converted the original downloads into `assets/models` and `assets/skybox` (`tools/convert_all.sh`)

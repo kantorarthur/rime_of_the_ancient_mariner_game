@@ -78,6 +78,13 @@ namespace gps {
             selected = index;
     }
 
+    GLuint Skybox::getSelectedTexture()
+    {
+        if(cubemaps.empty())
+            return 0;
+        return cubemaps[selected];
+    }
+
     void Skybox::draw(gps::Shader shader, glm::mat4 view, glm::mat4 projection, float brightness)
     {
         if(cubemaps.empty())

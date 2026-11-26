@@ -23,6 +23,7 @@ namespace gps {
         int addCubemap(std::string folder);
         void select(int index);
         void draw(gps::Shader shader, glm::mat4 view, glm::mat4 projection, float brightness);
+        GLuint getSelectedTexture();
 
     private:
         GLuint vao = 0;
