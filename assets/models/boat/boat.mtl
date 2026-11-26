@@ -1,0 +1,43 @@
+newmtl Boat_White
+Kd 0.749 0.749 0.749
+Ks 0.250 0.250 0.250
+
+newmtl Boat_Red
+Kd 0.379 0.089 0.084
+Ks 0.200 0.200 0.200
+
+newmtl Boat_Gray
+Kd 0.099 0.099 0.099
+Ks 0.100 0.100 0.100
+
+newmtl Metal
+Kd 0.404 0.404 0.404
+Ks 0.700 0.700 0.700
+
+newmtl Wood
+Kd 0.416 0.098 0.000
+Ks 0.100 0.100 0.100
+
+newmtl Plastic
+Kd 0.010 0.010 0.010
+Ks 0.400 0.400 0.400
+
+newmtl Box_Blue
+Kd 0.061 0.181 0.326
+Ks 0.300 0.300 0.300
+
+newmtl Box_Grey
+Kd 0.326 0.326 0.326
+Ks 0.300 0.300 0.300
+
+newmtl Floater_Red
+Kd 0.800 0.009 0.000
+Ks 0.300 0.300 0.300
+
+newmtl Floater_White
+Kd 0.800 0.800 0.800
+Ks 0.300 0.300 0.300
+
+newmtl Yellow
+Kd 0.865 0.421 0.000
+Ks 0.300 0.300 0.300

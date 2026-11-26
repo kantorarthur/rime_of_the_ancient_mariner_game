@@ -1,0 +1,5 @@
+newmtl coastal_cliff_02
+Kd 1.000 1.000 1.000
+Ks 1.000 1.000 1.000
+map_Kd cliff_diff.jpg
+map_Ks cliff_spec.png

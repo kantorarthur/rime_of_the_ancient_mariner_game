@@ -1,0 +1,11 @@
+newmtl modular_wooden_pier_planks
+Kd 1.000 1.000 1.000
+Ks 1.000 1.000 1.000
+map_Kd planks_diff.jpg
+map_Ks planks_spec.png
+
+newmtl modular_wooden_pier_poles
+Kd 1.000 1.000 1.000
+Ks 1.000 1.000 1.000
+map_Kd poles_diff.jpg
+map_Ks poles_spec.png

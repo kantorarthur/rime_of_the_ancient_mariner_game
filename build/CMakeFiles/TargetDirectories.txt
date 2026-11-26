@@ -1,0 +1,3 @@
+/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles/app.dir
+/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles/edit_cache.dir
+/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles/rebuild_cache.dir
