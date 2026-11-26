@@ -1,8 +1,13 @@
-# Blender sources and 4K source textures
+# Original downloads: Blender files, 4K textures, HDRIs (~1 GB, not needed at runtime)
 assets_src/
 *.blend
 *.blend1
 *.blend2
+*.exr
+*.hdr
+
+# Screenshots made during development
+Claude outputs/
 
 # Build output
 build/
@@ -23,6 +28,10 @@ Makefile
 *.o
 *.a
 *.so
+
+# Python cache from tools/
+__pycache__/
+*.pyc
 
 # IDE
 .vs/
