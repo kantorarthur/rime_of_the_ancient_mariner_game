@@ -1,0 +1,86 @@
+[
+ {
+  "name": "mariner",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_2",
+  "hair": [
+   "Hair_SimpleParted",
+   "Hair_Beard"
+  ],
+  "hair_texture": "hair_brown",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "old_mariner",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_2",
+  "hair": [
+   "Hair_Long",
+   "Hair_Beard"
+  ],
+  "hair_texture": "hair_white",
+  "beard_length": 2.6,
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "sailor_1",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_1",
+  "hair": [
+   "Hair_Buzzed"
+  ],
+  "hair_texture": "hair_black",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "sailor_2",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_1",
+  "hair": [
+   "Hair_SimpleParted",
+   "Hair_Beard"
+  ],
+  "hair_texture": "hair_black",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "sailor_3",
+  "outfit": "Male_Ranger",
+  "outfit_texture": "ranger_3",
+  "drop": [
+   "Pauldron",
+   "Bracer"
+  ],
+  "hair": [],
+  "hair_texture": "hair_brown",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "sailor_4",
+  "outfit": "Male_Ranger",
+  "outfit_texture": "ranger_3",
+  "drop": [
+   "Pauldron",
+   "Bracer",
+   "Hood"
+  ],
+  "hair": [
+   "Hair_Buzzed",
+   "Hair_Beard"
+  ],
+  "hair_texture": "hair_gold",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ }
+]

@@ -39,11 +39,11 @@ Run the program from the project root, since the paths to `assets/` are relative
 ## Project layout
 
 - `src/core`: window and input
-- `src/graphics`: shaders, meshes, models, lights, shadow maps, on-screen text, view modes
+- `src/graphics`: shaders, meshes, models, skinned meshes and skeletal animation, lights, shadow maps, on-screen text, view modes
 - `src/scene`: camera, skybox, water, fog, wind, rain, lightning, lighthouse beam and scene layout
 - `src/game`: the story, the ship controls and the cameras
 - `external`: stb_image, stb_easy_font, tinyobjloader
-- `assets`: models, skyboxes and shaders loaded at runtime
-- `tools`: Blender and ImageMagick scripts that converted the original downloads into `assets/models` and `assets/skybox` (`tools/convert_all.sh`)
+- `assets`: models, characters and their animations, skyboxes and shaders loaded at runtime
+- `tools`: Blender and ImageMagick scripts that converted the original downloads into `assets/models` and `assets/skybox` (`tools/convert_all.sh`), and the scripts that build the animated characters (`tools/build_characters.sh`)
 
 Asset sources and licenses are listed in `CREDITS.md`.

@@ -78,3 +78,5 @@ sky()
 }
 sky "{\"src\":\"$SRC/clarens_night_02_4k.exr\",\"outdir\":\"$SKY/calm\",\"size\":1024,\"exposure\":1.0,\"rotate\":12,\"horizon_color_srgb\":[0.07,0.09,0.13],\"horizon_low\":12.0,\"horizon_high\":20.0,\"horizon_low_near_moon\":1.0,\"horizon_high_near_moon\":10.0,\"moon_width\":30}" "$SKY/calm"
 sky "{\"src\":\"$SRC/clarens_night_01_4k.exr\",\"outdir\":\"$SKY/storm\",\"size\":1024,\"exposure\":0.45,\"saturation\":0.35,\"tint\":[0.85,0.92,1.05],\"rotate\":12,\"horizon_color_srgb\":[0.05,0.06,0.07],\"horizon_low\":12.0,\"horizon_high\":20.0,\"horizon_low_near_moon\":1.0,\"horizon_high_near_moon\":10.0,\"moon_width\":30}" "$SKY/storm"
+
+bash "$TOOLS/build_characters.sh"

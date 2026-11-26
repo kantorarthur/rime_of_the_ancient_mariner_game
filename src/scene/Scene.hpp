@@ -6,6 +6,7 @@
 #include "graphics/Model3D.hpp"
 #include "graphics/Shader.hpp"
 #include "graphics/ShadowMap.hpp"
+#include "scene/Character.hpp"
 #include "scene/Fog.hpp"
 #include "scene/LightBeam.hpp"
 #include "scene/Lightning.hpp"
@@ -15,6 +16,9 @@
 
 #include <glm/glm.hpp>
 
+#include <map>
+#include <memory>
+#include <string>
 #include <vector>
 
 namespace gps {
@@ -47,7 +51,8 @@ namespace gps {
         void load();
         void update(float deltaTime, glm::vec3 cameraPosition, glm::vec3 viewDirection);
         void draw(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc, GLint emissiveLoc);
-        void renderShadows(gps::Shader depthShader);
+        void renderShadows(gps::Shader depthShader, gps::Shader skinnedDepthShader);
+        void drawCharacters(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
         void uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition);
         void drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture);
         void drawBeam(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
@@ -80,6 +85,9 @@ namespace gps {
         gps::Model3D rocks[3];
 
         std::vector<SceneObject> objects;
+        std::map<std::string, std::unique_ptr<gps::SkinnedMesh>> skinnedMeshes;
+        std::map<std::string, std::unique_ptr<gps::AnimationClip>> clips;
+        std::vector<Character> characters;
         std::vector<PointLight> pointLights;
         SpotLight beam;
         DirectionalLight moon;
@@ -121,11 +129,17 @@ namespace gps {
         void placeFoam();
         void updateFloating();
         void updateLightSpaces();
+        void loadCharacters();
+        void placeCrew();
+        int addCharacter(std::string meshName, glm::vec3 localPosition, float localYaw, int parentObject);
+        void playAnimation(int character, std::string clipName, bool loop, float blendTime);
+        glm::mat4 characterMatrix(Character& character);
+        void drawCharacterDepth(gps::Shader shader, glm::mat4 lightSpace);
         void updateAlbatross(float deltaTime);
         void updateShip(float deltaTime);
         void placeObstacles();
         glm::vec3 albatrossPathPoint(float angle, float time);
-        void drawDepth(gps::Shader depthShader, gps::ShadowMap& shadowMap, glm::mat4 lightSpace, bool includeLighthouse);
+        void drawDepth(gps::Shader depthShader, glm::mat4 lightSpace, bool includeLighthouse);
         void setFloating(SceneObject& object, float draft, float length, float width);
         SceneObject& add(gps::Model3D& model, glm::vec3 position, float rotationY, float scale);
         glm::vec3 onCircle(float angleDegrees, float radius, float height);

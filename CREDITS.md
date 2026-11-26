@@ -33,6 +33,16 @@
 - **Albatross**: based on "Low Poly Seagull" by Nodelete, https://blendswap.com/blend/7419
   (wings posed in flight, wing tips darkened and vertex colors baked into a texture by `tools/make_albatross.py`)
 
+## Quaternius, CC0 (public domain)
+
+- **Characters** (`assets/characters`): built from "Universal Base Characters" (heads, eyes, eyebrows, hairstyles)
+  and "Modular Character Outfits - Fantasy" (peasant and ranger outfits), standard versions,
+  https://quaternius.com/packs/universalbasecharacters.html and https://quaternius.com/packs/modularcharacteroutfitsfantasy.html
+- **Animations** (`assets/characters/animations`): "Universal Animation Library" and "Universal Animation Library 2", standard versions,
+  https://quaternius.com/packs/universalanimationlibrary.html and https://quaternius.com/packs/universalanimationlibrary2.html
+- The outfits, heads and hair are joined into one skinned mesh per character, the finger bones are merged into the hands,
+  and the hair is tinted by `tools/build_characters.sh`.
+
 ## Generated in this project
 
 - The rocks (`rocks/rock_1..3`), the island (`island/`) and the curved cliff ring (`cliff/cliff_ring`)

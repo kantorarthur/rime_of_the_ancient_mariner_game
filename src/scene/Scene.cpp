@@ -47,6 +47,10 @@ namespace gps {
     const float ALBATROSS_BANK = 28.0f;
     const float ALBATROSS_FLAP_SPEED = 2.2f;
 
+    const std::string CHARACTER_FOLDER = "assets/characters/";
+    const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4"};
+    const char* ANIMATION_CLIPS[] = {"idle", "talk", "helm", "death", "sit", "sit_talk", "aim", "shoot", "bless", "bless_hold", "grieve", "kneel", "dance", "walk", "walk_formal", "swim", "hit", "interact", "haul", "rail", "rail_call", "shake_head", "fold_arms", "lantern", "rise", "zombie", "zombie_walk", "yes", "throw", "consume"};
+
     const int RAIN_DROP_COUNT = 12000;
     const glm::vec3 LIGHTNING_COLOR = glm::vec3(1.4f, 1.5f, 1.8f);
     const glm::vec3 LIGHTNING_AMBIENT = glm::vec3(0.10f, 0.11f, 0.14f);
@@ -68,6 +72,8 @@ namespace gps {
     {
         loadModels();
         placeObjects();
+        loadCharacters();
+        placeCrew();
         placeObstacles();
         placeLights();
         applyWeather();
@@ -150,6 +156,91 @@ namespace gps {
         add(rocks[0], glm::vec3(31.0f, -0.8f, 27.0f), 200.0f, 1.8f);
         add(rocks[1], glm::vec3(39.0f, -1.0f, -6.0f), 300.0f, 2.0f);
         add(rocks[2], glm::vec3(-10.0f, -0.8f, 44.0f), 80.0f, 1.4f);
+    }
+
+    void Scene::loadCharacters()
+    {
+        for(const char* name : CHARACTER_MESHES)
+        {
+            skinnedMeshes[name] = std::make_unique<gps::SkinnedMesh>();
+            skinnedMeshes[name]->load(CHARACTER_FOLDER + name + ".skin", CHARACTER_FOLDER + "textures");
+        }
+        for(const char* name : ANIMATION_CLIPS)
+        {
+            clips[name] = std::make_unique<gps::AnimationClip>();
+            clips[name]->load(CHARACTER_FOLDER + "animations/" + name + ".anim");
+        }
+    }
+
+    int Scene::addCharacter(std::string meshName, glm::vec3 localPosition, float localYaw, int parentObject)
+    {
+        Character character;
+        character.mesh = skinnedMeshes[meshName].get();
+        character.animator.attach(character.mesh);
+        character.localPosition = localPosition;
+        character.localYaw = localYaw;
+        character.parentObject = parentObject;
+        characters.push_back(character);
+        return (int)characters.size() - 1;
+    }
+
+    void Scene::playAnimation(int character, std::string clipName, bool loop, float blendTime)
+    {
+        characters[character].animator.play(clips[clipName].get(), loop, blendTime);
+    }
+
+    void Scene::placeCrew()
+    {
+        playAnimation(addCharacter("mariner", glm::vec3(0.0f, 6.5f, -7.6f), 0.0f, shipIndex), "helm", true, 0.0f);
+        playAnimation(addCharacter("sailor_1", glm::vec3(2.0f, 4.65f, 1.0f), 90.0f, shipIndex), "rail", true, 0.0f);
+        playAnimation(addCharacter("sailor_2", glm::vec3(-2.0f, 4.65f, -1.0f), -90.0f, shipIndex), "rail_call", true, 0.0f);
+        playAnimation(addCharacter("sailor_3", glm::vec3(0.8f, 6.3f, 6.0f), 0.0f, shipIndex), "fold_arms", true, 0.0f);
+        playAnimation(addCharacter("sailor_4", glm::vec3(-1.0f, 4.65f, 2.5f), 90.0f, shipIndex), "haul", true, 0.0f);
+    }
+
+    glm::mat4 Scene::characterMatrix(Character& character)
+    {
+        glm::mat4 parent = glm::mat4(1.0f);
+        if(character.parentObject >= 0)
+            parent = objects[character.parentObject].getModelMatrix();
+        glm::mat4 local = glm::translate(glm::mat4(1.0f), character.localPosition);
+        local = glm::rotate(local, glm::radians(character.localYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+        local = glm::scale(local, glm::vec3(character.scale));
+        return parent * local;
+    }
+
+    void Scene::drawCharacters(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition)
+    {
+        uploadEnvironment(shader, cameraPosition);
+        GLuint program = shader.shaderProgram;
+        glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniform1f(glGetUniformLocation(program, "emissiveStrength"), 0.0f);
+        glUniform1f(glGetUniformLocation(program, "shininess"), 16.0f);
+
+        for(Character& character : characters)
+        {
+            if(!character.visible)
+                continue;
+            glm::mat4 model = characterMatrix(character);
+            glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(model));
+            glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix3fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
+            character.mesh->draw(shader, character.animator.getPalette());
+        }
+    }
+
+    void Scene::drawCharacterDepth(gps::Shader shader, glm::mat4 lightSpace)
+    {
+        shader.useShaderProgram();
+        glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "lightSpace"), 1, GL_FALSE, glm::value_ptr(lightSpace));
+        for(Character& character : characters)
+        {
+            if(!character.visible)
+                continue;
+            glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(characterMatrix(character)));
+            character.mesh->draw(shader, character.animator.getPalette());
+        }
     }
 
     void Scene::placeObstacles()
@@ -398,6 +489,8 @@ namespace gps {
         updateShip(deltaTime);
         updateFloating();
         updateAlbatross(deltaTime);
+        for(Character& character : characters)
+            character.animator.update(deltaTime);
         wind.update(deltaTime, stormFactor);
         rain.update(deltaTime, wind.getVelocity(), glm::smoothstep(0.3f, 1.0f, stormFactor));
         lightning.update(deltaTime, stormFactor, cameraPosition, viewDirection);
@@ -428,13 +521,12 @@ namespace gps {
         beamLightSpace = beamProjection * beamView;
     }
 
-    void Scene::drawDepth(gps::Shader depthShader, gps::ShadowMap& shadowMap, glm::mat4 lightSpace, bool includeLighthouse)
+    void Scene::drawDepth(gps::Shader depthShader, glm::mat4 lightSpace, bool includeLighthouse)
     {
         GLint modelLoc = glGetUniformLocation(depthShader.shaderProgram, "model");
         GLint wingFlapLoc = glGetUniformLocation(depthShader.shaderProgram, "wingFlap");
         glUniformMatrix4fv(glGetUniformLocation(depthShader.shaderProgram, "lightSpace"), 1, GL_FALSE, glm::value_ptr(lightSpace));
 
-        shadowMap.begin();
         for(SceneObject& object : objects)
         {
             if(!object.visible)
@@ -445,15 +537,23 @@ namespace gps {
             glUniform1f(wingFlapLoc, object.wingFlap);
             object.model->Draw(depthShader);
         }
-        shadowMap.end();
     }
 
-    void Scene::renderShadows(gps::Shader depthShader)
+    void Scene::renderShadows(gps::Shader depthShader, gps::Shader skinnedDepthShader)
     {
         updateLightSpaces();
+
         depthShader.useShaderProgram();
-        drawDepth(depthShader, moonShadowMap, moonLightSpace, true);
-        drawDepth(depthShader, beamShadowMap, beamLightSpace, false);
+        moonShadowMap.begin();
+        drawDepth(depthShader, moonLightSpace, true);
+        drawCharacterDepth(skinnedDepthShader, moonLightSpace);
+        moonShadowMap.end();
+
+        depthShader.useShaderProgram();
+        beamShadowMap.begin();
+        drawDepth(depthShader, beamLightSpace, false);
+        drawCharacterDepth(skinnedDepthShader, beamLightSpace);
+        beamShadowMap.end();
     }
 
     void Scene::uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition)

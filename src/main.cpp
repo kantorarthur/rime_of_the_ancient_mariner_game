@@ -54,6 +54,8 @@ gps::Shader depthShader;
 gps::Shader rainShader;
 gps::Shader boltShader;
 gps::Shader textShader;
+gps::Shader skinnedShader;
+gps::Shader skinnedDepthShader;
 
 gps::Game game;
 gps::TextRenderer textRenderer;
@@ -204,6 +206,8 @@ void initShaders()
     rainShader.loadShader("assets/shaders/rain.vert", "assets/shaders/rain.frag");
     boltShader.loadShader("assets/shaders/bolt.vert", "assets/shaders/bolt.frag");
     textShader.loadShader("assets/shaders/text.vert", "assets/shaders/text.frag");
+    skinnedShader.loadShader("assets/shaders/skinned.vert", "assets/shaders/basic.frag");
+    skinnedDepthShader.loadShader("assets/shaders/skinned_shadow.vert", "assets/shaders/shadow.frag");
 }
 
 void initUniforms()
@@ -225,7 +229,7 @@ void initUniforms()
 void renderScene()
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    scene.renderShadows(depthShader);
+    scene.renderShadows(depthShader, skinnedDepthShader);
     glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -239,6 +243,9 @@ void renderScene()
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniform1i(flatShadingLoc, viewMode.isFlatShading());
     scene.draw(myBasicShader, modelLoc, normalMatrixLoc, emissiveLoc);
+    skinnedShader.useShaderProgram();
+    glUniform1i(glGetUniformLocation(skinnedShader.shaderProgram, "flatShading"), viewMode.isFlatShading());
+    scene.drawCharacters(skinnedShader, view, projection, cameraPosition);
     scene.drawWater(waterShader, view, projection, cameraPosition, skybox.getSelectedTexture());
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
