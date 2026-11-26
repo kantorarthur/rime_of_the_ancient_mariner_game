@@ -4,6 +4,8 @@
 #include "graphics/Lights.hpp"
 #include "graphics/Model3D.hpp"
 #include "graphics/Shader.hpp"
+#include "scene/Fog.hpp"
+#include "scene/LightBeam.hpp"
 #include "scene/Water.hpp"
 
 #include <glm/glm.hpp>
@@ -38,11 +40,14 @@ namespace gps {
         void load();
         void update(float deltaTime);
         void draw(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc, GLint emissiveLoc);
-        void uploadLights(gps::Shader shader);
+        void uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition);
         void drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture);
+        void drawBeam(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
 
         void toggleWeather();
         Weather getWeather();
+        void toggleFog();
+        bool isFogEnabled();
 
     private:
         gps::Model3D island;
@@ -62,6 +67,8 @@ namespace gps {
         DirectionalLight moon;
 
         gps::Water water;
+        gps::Fog fog;
+        gps::LightBeam lightBeam;
 
         Weather weather = Weather::Storm;
         float stormFactor = 1.0f;

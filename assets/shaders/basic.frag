@@ -1,45 +1,13 @@
 #version 410 core
 
-#define MAX_POINT_LIGHTS 8
+#include "lights.glsl"
+#include "fog.glsl"
 
 in vec3 fWorldPosition;
 in vec3 fNormal;
 in vec2 fTexCoords;
 
 out vec4 fColor;
-
-struct DirectionalLight
-{
-    vec3 direction;
-    vec3 color;
-    vec3 ambient;
-};
-
-struct PointLight
-{
-    vec3 position;
-    vec3 color;
-    float constant;
-    float linear;
-    float quadratic;
-};
-
-struct SpotLight
-{
-    vec3 position;
-    vec3 direction;
-    vec3 color;
-    float cutOff;
-    float outerCutOff;
-    float constant;
-    float linear;
-    float quadratic;
-};
-
-uniform DirectionalLight moon;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-uniform int pointLightCount;
-uniform SpotLight beam;
 
 uniform vec3 cameraPosition;
 uniform float shininess;
@@ -58,11 +26,6 @@ vec3 shade(vec3 lightDirection, vec3 lightColor, vec3 normal, vec3 viewDirection
     if(diffuse > 0.0)
         specular = pow(max(dot(normal, halfway), 0.0), shininess);
     return lightColor * (diffuse * albedo + specular * specularColor);
-}
-
-float attenuation(float distance, float constant, float linear, float quadratic)
-{
-    return 1.0 / (constant + linear * distance + quadratic * distance * distance);
 }
 
 void main()
@@ -97,12 +60,10 @@ void main()
     vec3 toBeam = beam.position - fWorldPosition;
     float beamDistance = length(toBeam);
     vec3 beamDirection = toBeam / beamDistance;
-    float theta = dot(beamDirection, normalize(-beam.direction));
-    float cone = clamp((theta - beam.outerCutOff) / (beam.cutOff - beam.outerCutOff), 0.0, 1.0);
     float beamFalloff = attenuation(beamDistance, beam.constant, beam.linear, beam.quadratic);
-    color += cone * beamFalloff * shade(beamDirection, beam.color, normal, viewDirection, albedo, specularColor);
+    color += beamCone(beamDirection) * beamFalloff * shade(beamDirection, beam.color, normal, viewDirection, albedo, specularColor);
 
     color += texture(emissiveTexture, fTexCoords).rgb * emissiveStrength;
 
-    fColor = vec4(color, 1.0);
+    fColor = vec4(applyFog(color, cameraPosition, fWorldPosition), 1.0);
 }

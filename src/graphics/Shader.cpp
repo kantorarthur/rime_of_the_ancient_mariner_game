@@ -15,8 +15,20 @@ namespace gps {
             return "";
         }
 
+        std::string folder = fileName.substr(0, fileName.find_last_of('/') + 1);
         std::stringstream shaderStringStream;
-        shaderStringStream << shaderFile.rdbuf();
+        std::string line;
+        while(std::getline(shaderFile, line))
+        {
+            if(line.rfind("#include", 0) == 0)
+            {
+                size_t first = line.find('"');
+                size_t last = line.find_last_of('"');
+                shaderStringStream << readShaderFile(folder + line.substr(first + 1, last - first - 1));
+            }
+            else
+                shaderStringStream << line << "\n";
+        }
         return shaderStringStream.str();
     }
 

@@ -29,7 +29,6 @@ GLint viewLoc;
 GLint projectionLoc;
 GLint normalMatrixLoc;
 GLint flatShadingLoc;
-GLint cameraPositionLoc;
 GLint emissiveLoc;
 
 gps::Camera myCamera(
@@ -52,6 +51,7 @@ int stormSky = 0;
 gps::Shader myBasicShader;
 gps::Shader skyboxShader;
 gps::Shader waterShader;
+gps::Shader beamShader;
 
 GLenum glCheckError_(const char* file, int line)
 {
@@ -106,7 +106,8 @@ void handleResize()
 void updateWindowTitle()
 {
     std::string weather = scene.getWeather() == gps::Weather::Calm ? "calm" : "storm";
-    std::string title = "The Rime of the Ancient Mariner | " + viewMode.describe() + " | " + weather;
+    std::string fog = scene.isFogEnabled() ? "fog" : "clear";
+    std::string title = "The Rime of the Ancient Mariner | " + viewMode.describe() + " | " + weather + ", " + fog;
     glfwSetWindowTitle(myWindow.getWindow(), title.c_str());
 }
 
@@ -148,6 +149,12 @@ void handleKeyPresses()
             skybox.select(calmSky);
         else
             skybox.select(stormSky);
+        viewChanged = true;
+    }
+
+    if(input.wasKeyPressed(GLFW_KEY_F))
+    {
+        scene.toggleFog();
         viewChanged = true;
     }
 
@@ -212,6 +219,7 @@ void initShaders()
     myBasicShader.loadShader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
     skyboxShader.loadShader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
     waterShader.loadShader("assets/shaders/water.vert", "assets/shaders/water.frag");
+    beamShader.loadShader("assets/shaders/beam.vert", "assets/shaders/beam.frag");
 }
 
 void initUniforms()
@@ -223,7 +231,6 @@ void initUniforms()
     projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
     normalMatrixLoc = glGetUniformLocation(myBasicShader.shaderProgram, "normalMatrix");
     flatShadingLoc = glGetUniformLocation(myBasicShader.shaderProgram, "flatShading");
-    cameraPositionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "cameraPosition");
     emissiveLoc = glGetUniformLocation(myBasicShader.shaderProgram, "emissiveStrength");
 
     glUniform1f(glGetUniformLocation(myBasicShader.shaderProgram, "shininess"), 32.0f);
@@ -238,17 +245,18 @@ void renderScene()
     viewMode.apply();
 
     view = myCamera.getViewMatrix();
-    myBasicShader.useShaderProgram();
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniform3fv(cameraPositionLoc, 1, glm::value_ptr(myCamera.getPosition()));
-    glUniform1i(flatShadingLoc, viewMode.isFlatShading());
+    glm::vec3 cameraPosition = myCamera.getPosition();
 
-    scene.uploadLights(myBasicShader);
+    scene.uploadEnvironment(myBasicShader, cameraPosition);
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniform1i(flatShadingLoc, viewMode.isFlatShading());
     scene.draw(myBasicShader, modelLoc, normalMatrixLoc, emissiveLoc);
-    scene.drawWater(waterShader, view, projection, myCamera.getPosition(), skybox.getSelectedTexture());
+    scene.drawWater(waterShader, view, projection, cameraPosition, skybox.getSelectedTexture());
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    scene.uploadEnvironment(skyboxShader, cameraPosition);
     skybox.draw(skyboxShader, view, projection, 1.0f);
+    scene.drawBeam(beamShader, view, projection, cameraPosition);
 }
 
 void cleanup()

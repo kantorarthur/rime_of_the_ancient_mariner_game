@@ -20,6 +20,9 @@ namespace gps {
     const float LIGHTHOUSE_LAMP_HEIGHT = 16.3f;
     const float BEAM_SPEED_DEGREES = 30.0f;
     const float BEAM_TILT = -0.12f;
+    const float BEAM_SHAFT_LENGTH = 150.0f;
+    const float BEAM_SHAFT_RADIUS = 0.6f;
+    const float BEAM_SHAFT_SPREAD = 4.5f;
 
     const glm::vec3 CALM_MOON_DIRECTION = glm::vec3(0.378f, 0.378f, -0.845f);
     const glm::vec3 STORM_MOON_DIRECTION = glm::vec3(0.399f, 0.227f, -0.888f);
@@ -47,6 +50,8 @@ namespace gps {
             stormFactor = 0.0f;
         water.update(0.0f, stormFactor);
         updateFloating();
+        fog.update(0.0f, stormFactor);
+        lightBeam.init(BEAM_SHAFT_LENGTH, BEAM_SHAFT_RADIUS, BEAM_SHAFT_SPREAD, 48);
     }
 
     void Scene::loadModels()
@@ -165,6 +170,16 @@ namespace gps {
         return weather;
     }
 
+    void Scene::toggleFog()
+    {
+        fog.toggle();
+    }
+
+    bool Scene::isFogEnabled()
+    {
+        return fog.isEnabled();
+    }
+
     void Scene::placeFoam()
     {
         water.addFoamCircle(glm::vec2(0.0f), 21.6f, 1.8f);
@@ -215,6 +230,7 @@ namespace gps {
         stormFactor += glm::clamp(target - stormFactor, -step, step);
         water.update(deltaTime, stormFactor);
         updateFloating();
+        fog.update(deltaTime, stormFactor);
 
         beamAngle += BEAM_SPEED_DEGREES * deltaTime;
         if(beamAngle >= 360.0f)
@@ -224,18 +240,26 @@ namespace gps {
         beam.direction = glm::vec3(std::cos(angle), BEAM_TILT, std::sin(angle));
     }
 
-    void Scene::uploadLights(gps::Shader shader)
+    void Scene::uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition)
     {
         shader.useShaderProgram();
         uploadDirectionalLight(shader.shaderProgram, "moon", moon);
         uploadPointLights(shader.shaderProgram, pointLights);
         uploadSpotLight(shader.shaderProgram, "beam", beam);
+        fog.upload(shader);
+        glUniform3fv(glGetUniformLocation(shader.shaderProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
     }
 
     void Scene::drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture)
     {
-        uploadLights(shader);
+        uploadEnvironment(shader, cameraPosition);
         water.draw(shader, view, projection, cameraPosition, skyboxTexture);
+    }
+
+    void Scene::drawBeam(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition)
+    {
+        uploadEnvironment(shader, cameraPosition);
+        lightBeam.draw(shader, view, projection, beam.position, beam.direction);
     }
 
     SceneObject& Scene::add(gps::Model3D& model, glm::vec3 position, float rotationY, float scale)

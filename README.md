@@ -30,13 +30,14 @@ Run the program from the project root, since the paths to `assets/` are relative
 | 1 / 2 / 3 | solid / wireframe / points |
 | 4 | toggle flat / smooth shading |
 | T | toggle weather (calm / storm) |
+| F | toggle fog |
 | Esc | quit |
 
 ## Project layout
 
 - `src/core`: window and input
 - `src/graphics`: shaders, meshes, models, lights, view modes
-- `src/scene`: camera, skybox, water and scene layout
+- `src/scene`: camera, skybox, water, fog, lighthouse beam and scene layout
 - `external`: stb_image, tinyobjloader
 - `assets`: models, skyboxes and shaders loaded at runtime
 - `tools`: Blender and ImageMagick scripts that converted the original downloads into `assets/models` and `assets/skybox` (`tools/convert_all.sh`)
