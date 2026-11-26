@@ -27,11 +27,19 @@ namespace gps {
 
     const int MOON_SHADOW_SIZE = 4096;
     const int BEAM_SHADOW_SIZE = 2048;
-    const glm::vec3 MOON_SHADOW_CENTER = glm::vec3(-3.0f, 0.0f, 10.0f);
     const float MOON_SHADOW_RADIUS = 62.0f;
     const float MOON_SHADOW_DISTANCE = 150.0f;
     const GLuint MOON_SHADOW_UNIT = 5;
     const GLuint BEAM_SHADOW_UNIT = 6;
+
+    const glm::vec2 SHIP_START_POSITION = glm::vec2(30.0f, 75.0f);
+    const float SHIP_START_HEADING = 200.0f;
+    const float SHIP_DRAFT = 3.2f;
+    const float SHIP_MODEL_YAW = 180.0f;
+    const float SHIP_LENGTH = 30.0f;
+    const float SHIP_WIDTH = 7.5f;
+    const float ISLAND_RADIUS = 23.0f;
+    const glm::vec3 SHIP_LANTERN = glm::vec3(0.0f, 14.5f, -16.0f);
 
     const float ALBATROSS_RADIUS = 26.0f;
     const float ALBATROSS_HEIGHT = 25.0f;
@@ -60,6 +68,7 @@ namespace gps {
     {
         loadModels();
         placeObjects();
+        placeObstacles();
         placeLights();
         applyWeather();
 
@@ -119,6 +128,12 @@ namespace gps {
         SceneObject& wreck = add(ship, glm::vec3(-46.0f, -5.5f, 18.0f), 65.0f, 1.0f);
         wreck.rotationDegrees.x = -7.0f;
         wreck.rotationDegrees.z = 21.0f;
+        wreck.visible = false;
+        wreckIndex = (int)objects.size() - 1;
+
+        shipController.reset(SHIP_START_POSITION, SHIP_START_HEADING);
+        setFloating(add(ship, glm::vec3(SHIP_START_POSITION.x, 0.0f, SHIP_START_POSITION.y), SHIP_START_HEADING + SHIP_MODEL_YAW, 1.0f), SHIP_DRAFT, SHIP_LENGTH, SHIP_WIDTH);
+        shipIndex = (int)objects.size() - 1;
 
         setFloating(add(crate, glm::vec3(-26.0f, 0.0f, 22.0f), 25.0f, 1.0f), 0.22f, 1.17f, 0.53f);
         setFloating(add(crate, glm::vec3(-16.0f, 0.0f, 40.0f), 70.0f, 1.0f), 0.22f, 1.17f, 0.53f);
@@ -135,6 +150,27 @@ namespace gps {
         add(rocks[0], glm::vec3(31.0f, -0.8f, 27.0f), 200.0f, 1.8f);
         add(rocks[1], glm::vec3(39.0f, -1.0f, -6.0f), 300.0f, 2.0f);
         add(rocks[2], glm::vec3(-10.0f, -0.8f, 44.0f), 80.0f, 1.4f);
+    }
+
+    void Scene::placeObstacles()
+    {
+        obstacles.push_back({glm::vec2(0.0f), ISLAND_RADIUS});
+
+        for(int i = 0; i < 4; i++)
+        {
+            glm::vec3 pierPoint = onCircle(PIER_ANGLE, 23.0f + i * PIER_SECTION_LENGTH, 0.0f);
+            obstacles.push_back({glm::vec2(pierPoint.x, pierPoint.z), 2.0f});
+        }
+
+        for(SceneObject& object : objects)
+        {
+            bool isRock = object.model == &rocks[0] || object.model == &rocks[1] || object.model == &rocks[2];
+            bool isBoat = object.model == &boat;
+            if(isRock)
+                obstacles.push_back({glm::vec2(object.position.x, object.position.z), 1.2f * object.scale});
+            if(isBoat)
+                obstacles.push_back({glm::vec2(object.position.x, object.position.z), 2.4f});
+        }
     }
 
     void Scene::placeLights()
@@ -158,6 +194,9 @@ namespace gps {
 
         glm::vec3 lanternLight = lanternObject->position + glm::vec3(0.0f, 0.35f, 0.0f);
         pointLights.push_back({lanternLight, glm::vec3(1.0f, 0.66f, 0.3f) * 2.2f, 1.0f, 0.3f, 0.18f});
+
+        pointLights.push_back({toWorld(objects[shipIndex], SHIP_LANTERN), glm::vec3(1.0f, 0.68f, 0.35f) * 3.0f, 1.0f, 0.12f, 0.03f});
+        shipLanternLight = (int)pointLights.size() - 1;
 
         beam.position = lamp;
         beam.color = glm::vec3(1.0f, 0.92f, 0.72f) * 3.5f;
@@ -192,6 +231,12 @@ namespace gps {
         else
             weather = Weather::Calm;
         applyWeather();
+    }
+
+    void Scene::setWeather(Weather newWeather)
+    {
+        if(weather != newWeather)
+            toggleWeather();
     }
 
     Weather Scene::getWeather()
@@ -229,7 +274,8 @@ namespace gps {
     void Scene::placeFoam()
     {
         water.addFoamCircle(glm::vec2(0.0f), 21.6f, 1.8f);
-        water.addFoamCircle(glm::vec2(-46.0f, 18.0f), 7.0f, 3.0f);
+        if(objects[wreckIndex].visible)
+            water.addFoamCircle(glm::vec2(-46.0f, 18.0f), 7.0f, 3.0f);
 
         for(SceneObject& object : objects)
         {
@@ -304,12 +350,52 @@ namespace gps {
         bird.wingFlap = glm::radians(5.0f + envelope * 32.0f * stroke);
     }
 
+    void Scene::setShipControls(float sail, float helm)
+    {
+        shipSailInput = sail;
+        shipHelmInput = helm;
+    }
+
+    void Scene::updateShip(float deltaTime)
+    {
+        float windStrength = glm::mix(0.7f, 1.0f, stormFactor);
+        shipController.update(deltaTime, shipSailInput, shipHelmInput, windStrength, obstacles);
+
+        SceneObject& playerShip = objects[shipIndex];
+        glm::vec2 position = shipController.getPosition();
+        playerShip.position.x = position.x;
+        playerShip.position.z = position.y;
+        playerShip.rotationDegrees.y = shipController.getHeadingDegrees() + SHIP_MODEL_YAW;
+        pointLights[shipLanternLight].position = toWorld(playerShip, SHIP_LANTERN);
+    }
+
+    glm::vec3 Scene::getShipPosition()
+    {
+        return objects[shipIndex].position;
+    }
+
+    float Scene::getShipHeadingDegrees()
+    {
+        return shipController.getHeadingDegrees();
+    }
+
+    float Scene::getShipSpeed()
+    {
+        return shipController.getSpeed();
+    }
+
+    float Scene::getShipSail()
+    {
+        return shipController.getSail();
+    }
+
     void Scene::update(float deltaTime, glm::vec3 cameraPosition, glm::vec3 viewDirection)
     {
         float target = weather == Weather::Storm ? 1.0f : 0.0f;
         float step = 0.35f * deltaTime;
         stormFactor += glm::clamp(target - stormFactor, -step, step);
         water.update(deltaTime, stormFactor);
+        updateShip(deltaTime);
         updateFloating();
         updateAlbatross(deltaTime);
         wind.update(deltaTime, stormFactor);
@@ -328,8 +414,11 @@ namespace gps {
 
     void Scene::updateLightSpaces()
     {
+        float texel = 2.0f * MOON_SHADOW_RADIUS / MOON_SHADOW_SIZE;
+        glm::vec3 shipPosition = getShipPosition();
+        glm::vec3 center = glm::vec3(std::floor(shipPosition.x / texel) * texel, 0.0f, std::floor(shipPosition.z / texel) * texel);
         glm::vec3 toMoon = glm::normalize(moon.direction);
-        glm::mat4 moonView = glm::lookAt(MOON_SHADOW_CENTER + toMoon * MOON_SHADOW_DISTANCE, MOON_SHADOW_CENTER, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 moonView = glm::lookAt(center + toMoon * MOON_SHADOW_DISTANCE, center, glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 moonProjection = glm::ortho(-MOON_SHADOW_RADIUS, MOON_SHADOW_RADIUS, -MOON_SHADOW_RADIUS, MOON_SHADOW_RADIUS, 1.0f, 2.0f * MOON_SHADOW_DISTANCE);
         moonLightSpace = moonProjection * moonView;
 
@@ -348,6 +437,8 @@ namespace gps {
         shadowMap.begin();
         for(SceneObject& object : objects)
         {
+            if(!object.visible)
+                continue;
             if(!includeLighthouse && object.model == &lighthouse)
                 continue;
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(object.getModelMatrix()));
@@ -427,6 +518,9 @@ namespace gps {
 
         for(SceneObject& object : objects)
         {
+            if(!object.visible)
+                continue;
+
             glm::mat4 model = object.getModelMatrix();
             glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(model));
 

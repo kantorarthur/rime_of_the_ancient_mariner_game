@@ -1,6 +1,7 @@
 #ifndef Scene_hpp
 #define Scene_hpp
 
+#include "game/ShipController.hpp"
 #include "graphics/Lights.hpp"
 #include "graphics/Model3D.hpp"
 #include "graphics/Shader.hpp"
@@ -31,6 +32,7 @@ namespace gps {
         float floatLength = 0.0f;
         float floatWidth = 0.0f;
         float wingFlap = 0.0f;
+        bool visible = true;
 
         glm::mat4 getModelMatrix();
     };
@@ -52,10 +54,17 @@ namespace gps {
         void drawWeather(gps::Shader rainShader, gps::Shader boltShader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
 
         void toggleWeather();
+        void setWeather(Weather newWeather);
         Weather getWeather();
         void toggleFog();
         bool isFogEnabled();
         void triggerLightning(glm::vec3 cameraPosition, glm::vec3 viewDirection);
+
+        void setShipControls(float sail, float helm);
+        glm::vec3 getShipPosition();
+        float getShipHeadingDegrees();
+        float getShipSpeed();
+        float getShipSail();
 
     private:
         gps::Model3D island;
@@ -87,9 +96,17 @@ namespace gps {
         glm::mat4 moonLightSpace = glm::mat4(1.0f);
         glm::mat4 beamLightSpace = glm::mat4(1.0f);
 
-        Weather weather = Weather::Storm;
-        float stormFactor = 1.0f;
+        Weather weather = Weather::Calm;
+        float stormFactor = 0.0f;
         float beamAngle = 0.0f;
+
+        int shipIndex = -1;
+        int shipLanternLight = -1;
+        int wreckIndex = -1;
+        gps::ShipController shipController;
+        std::vector<Obstacle> obstacles;
+        float shipSailInput = 0.0f;
+        float shipHelmInput = 0.0f;
 
         int albatrossIndex = -1;
         float albatrossTime = 0.0f;
@@ -105,6 +122,8 @@ namespace gps {
         void updateFloating();
         void updateLightSpaces();
         void updateAlbatross(float deltaTime);
+        void updateShip(float deltaTime);
+        void placeObstacles();
         glm::vec3 albatrossPathPoint(float angle, float time);
         void drawDepth(gps::Shader depthShader, gps::ShadowMap& shadowMap, glm::mat4 lightSpace, bool includeLighthouse);
         void setFloating(SceneObject& object, float draft, float length, float width);

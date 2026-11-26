@@ -19,6 +19,7 @@ namespace gps {
         glm::vec3 getPosition();
         glm::vec3 getFrontDirection();
         void setPosition(glm::vec3 position);
+        void lookAt(glm::vec3 position, glm::vec3 target);
 
     private:
         void updateVectors();

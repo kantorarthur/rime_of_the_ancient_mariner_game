@@ -77,6 +77,15 @@ namespace gps {
         cameraTarget = cameraPosition + cameraFrontDirection;
     }
 
+    void Camera::lookAt(glm::vec3 position, glm::vec3 target)
+    {
+        cameraPosition = position;
+        glm::vec3 front = glm::normalize(target - position);
+        pitch = glm::degrees(std::asin(glm::clamp(front.y, -1.0f, 1.0f)));
+        yaw = glm::degrees(std::atan2(front.z, front.x));
+        updateVectors();
+    }
+
     void Camera::updateVectors()
     {
         float yawRad = glm::radians(yaw);

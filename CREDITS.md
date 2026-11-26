@@ -42,9 +42,9 @@
 
 ## Text
 
-- Epigraph from *The Rime of the Ancient Mariner* by Samuel Taylor Coleridge (1798), public domain.
+- All verses shown in the game are from *The Rime of the Ancient Mariner* by Samuel Taylor Coleridge (1798), public domain.
 
 ## Libraries
 
-- stb_image (Sean Barrett, public domain / MIT)
+- stb_image and stb_easy_font (Sean Barrett, public domain / MIT)
 - tinyobjloader (Syoyo Fujita, MIT)

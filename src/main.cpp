@@ -4,6 +4,8 @@
 #include "graphics/Shader.hpp"
 #include "graphics/Model3D.hpp"
 #include "graphics/ViewMode.hpp"
+#include "game/Game.hpp"
+#include "graphics/TextRenderer.hpp"
 #include "scene/Camera.hpp"
 #include "scene/Scene.hpp"
 #include "scene/Skybox.hpp"
@@ -36,10 +38,6 @@ gps::Camera myCamera(
     glm::vec3(0.0f, 5.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-float cameraSpeed = 8.0f;
-float sprintMultiplier = 3.0f;
-float mouseSensitivity = 0.1f;
-
 float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
 
@@ -55,6 +53,10 @@ gps::Shader beamShader;
 gps::Shader depthShader;
 gps::Shader rainShader;
 gps::Shader boltShader;
+gps::Shader textShader;
+
+gps::Game game;
+gps::TextRenderer textRenderer;
 
 GLenum glCheckError_(const char* file, int line)
 {
@@ -110,7 +112,7 @@ void updateWindowTitle()
 {
     std::string weather = scene.getWeather() == gps::Weather::Calm ? "calm" : "storm";
     std::string fog = scene.isFogEnabled() ? "fog" : "clear";
-    std::string title = "The Rime of the Ancient Mariner | " + viewMode.describe() + " | " + weather + ", " + fog;
+    std::string title = "The Rime of the Ancient Mariner | " + game.describeMode() + " | " + viewMode.describe() + " | " + weather + ", " + fog;
     glfwSetWindowTitle(myWindow.getWindow(), title.c_str());
 }
 
@@ -148,12 +150,11 @@ void handleKeyPresses()
     if(input.wasKeyPressed(GLFW_KEY_T))
     {
         scene.toggleWeather();
-        if(scene.getWeather() == gps::Weather::Calm)
-            skybox.select(calmSky);
-        else
-            skybox.select(stormSky);
         viewChanged = true;
     }
+
+    if(input.wasKeyPressed(GLFW_KEY_C))
+        viewChanged = true;
 
     if(input.wasKeyPressed(GLFW_KEY_L))
         scene.triggerLightning(myCamera.getPosition(), myCamera.getFrontDirection());
@@ -166,29 +167,6 @@ void handleKeyPresses()
 
     if(viewChanged)
         updateWindowTitle();
-}
-
-void processCamera()
-{
-    glm::vec2 mouseDelta = input.getMouseDelta() * mouseSensitivity;
-    myCamera.rotate(mouseDelta.y, mouseDelta.x);
-
-    float velocity = cameraSpeed * deltaTime;
-    if(input.isKeyDown(GLFW_KEY_LEFT_SHIFT))
-        velocity *= sprintMultiplier;
-
-    if(input.isKeyDown(GLFW_KEY_W))
-        myCamera.move(gps::MOVE_FORWARD, velocity);
-    if(input.isKeyDown(GLFW_KEY_S))
-        myCamera.move(gps::MOVE_BACKWARD, velocity);
-    if(input.isKeyDown(GLFW_KEY_A))
-        myCamera.move(gps::MOVE_LEFT, velocity);
-    if(input.isKeyDown(GLFW_KEY_D))
-        myCamera.move(gps::MOVE_RIGHT, velocity);
-    if(input.isKeyDown(GLFW_KEY_SPACE))
-        myCamera.move(gps::MOVE_UP, velocity);
-    if(input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-        myCamera.move(gps::MOVE_DOWN, velocity);
 }
 
 void initOpenGLWindow()
@@ -214,10 +192,6 @@ void initModels()
     skybox.init();
     calmSky = skybox.addCubemap("assets/skybox/calm");
     stormSky = skybox.addCubemap("assets/skybox/storm");
-    if(scene.getWeather() == gps::Weather::Calm)
-        skybox.select(calmSky);
-    else
-        skybox.select(stormSky);
 }
 
 void initShaders()
@@ -229,6 +203,7 @@ void initShaders()
     depthShader.loadShader("assets/shaders/shadow.vert", "assets/shaders/shadow.frag");
     rainShader.loadShader("assets/shaders/rain.vert", "assets/shaders/rain.frag");
     boltShader.loadShader("assets/shaders/bolt.vert", "assets/shaders/bolt.frag");
+    textShader.loadShader("assets/shaders/text.vert", "assets/shaders/text.frag");
 }
 
 void initUniforms()
@@ -267,10 +242,16 @@ void renderScene()
     scene.drawWater(waterShader, view, projection, cameraPosition, skybox.getSelectedTexture());
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    if(scene.getWeather() == gps::Weather::Calm)
+        skybox.select(calmSky);
+    else
+        skybox.select(stormSky);
     scene.uploadEnvironment(skyboxShader, cameraPosition);
     skybox.draw(skyboxShader, view, projection, 1.0f);
     scene.drawBeam(beamShader, view, projection, cameraPosition);
     scene.drawWeather(rainShader, boltShader, view, projection, cameraPosition);
+
+    game.drawOverlay(textRenderer, scene, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
 }
 
 void cleanup()
@@ -294,6 +275,8 @@ int main()
     initModels();
     initShaders();
     initUniforms();
+    textRenderer.init(textShader);
+    game.start(scene);
     updateWindowTitle();
     glCheckError();
 
@@ -310,8 +293,8 @@ int main()
             deltaTime = 0.1f;
 
         handleResize();
+        game.update(deltaTime, input, myCamera, scene);
         handleKeyPresses();
-        processCamera();
         scene.update(deltaTime, myCamera.getPosition(), myCamera.getFrontDirection());
 
         renderScene();

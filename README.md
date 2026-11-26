@@ -22,10 +22,12 @@ Run the program from the project root, since the paths to `assets/` are relative
 
 | Key | Action |
 |---|---|
-| W A S D | move the camera |
-| Space / Left Ctrl | move up / down |
-| Left Shift (hold) | move 3× faster |
-| Mouse | look around |
+| W / S | raise / lower the sails |
+| A / D | turn the helm left / right |
+| Mouse | look around the ship |
+| C | switch between the ship and the free camera |
+| W A S D, Space / Left Ctrl | move the free camera |
+| Left Shift (hold) | free camera 3× faster |
 | Tab | release / capture the mouse |
 | 1 / 2 / 3 | solid / wireframe / points |
 | 4 | toggle flat / smooth shading |
@@ -37,9 +39,10 @@ Run the program from the project root, since the paths to `assets/` are relative
 ## Project layout
 
 - `src/core`: window and input
-- `src/graphics`: shaders, meshes, models, lights, shadow maps, view modes
+- `src/graphics`: shaders, meshes, models, lights, shadow maps, on-screen text, view modes
 - `src/scene`: camera, skybox, water, fog, wind, rain, lightning, lighthouse beam and scene layout
-- `external`: stb_image, tinyobjloader
+- `src/game`: the story, the ship controls and the cameras
+- `external`: stb_image, stb_easy_font, tinyobjloader
 - `assets`: models, skyboxes and shaders loaded at runtime
 - `tools`: Blender and ImageMagick scripts that converted the original downloads into `assets/models` and `assets/skybox` (`tools/convert_all.sh`)
 
