@@ -30,6 +30,7 @@ namespace gps {
         float floatDraft = 0.0f;
         float floatLength = 0.0f;
         float floatWidth = 0.0f;
+        float wingFlap = 0.0f;
 
         glm::mat4 getModelMatrix();
     };
@@ -66,6 +67,7 @@ namespace gps {
         gps::Model3D boat;
         gps::Model3D ship;
         gps::Model3D crate;
+        gps::Model3D albatross;
         gps::Model3D rocks[3];
 
         std::vector<SceneObject> objects;
@@ -89,6 +91,11 @@ namespace gps {
         float stormFactor = 1.0f;
         float beamAngle = 0.0f;
 
+        int albatrossIndex = -1;
+        float albatrossTime = 0.0f;
+        float albatrossAngle = 0.0f;
+        glm::vec3 albatrossPrevious = glm::vec3(0.0f);
+
         void loadModels();
         void placeObjects();
         void placeLights();
@@ -97,6 +104,8 @@ namespace gps {
         void placeFoam();
         void updateFloating();
         void updateLightSpaces();
+        void updateAlbatross(float deltaTime);
+        glm::vec3 albatrossPathPoint(float angle, float time);
         void drawDepth(gps::Shader depthShader, gps::ShadowMap& shadowMap, glm::mat4 lightSpace, bool includeLighthouse);
         void setFloating(SceneObject& object, float draft, float length, float width);
         SceneObject& add(gps::Model3D& model, glm::vec3 position, float rotationY, float scale);

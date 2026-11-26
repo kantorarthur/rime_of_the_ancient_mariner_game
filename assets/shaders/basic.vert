@@ -1,5 +1,7 @@
 #version 410 core
 
+#include "wings.glsl"
+
 layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vTexCoords;
@@ -15,9 +17,13 @@ uniform mat3 normalMatrix;
 
 void main()
 {
-    vec4 worldPosition = model * vec4(vPosition, 1.0);
+    vec3 position = vPosition;
+    vec3 normal = vNormal;
+    flapWings(position, normal);
+
+    vec4 worldPosition = model * vec4(position, 1.0);
     fWorldPosition = worldPosition.xyz;
-    fNormal = normalMatrix * vNormal;
+    fNormal = normalMatrix * normal;
     fTexCoords = vTexCoords;
     gl_Position = projection * view * worldPosition;
 }

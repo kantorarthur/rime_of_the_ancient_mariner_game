@@ -5,7 +5,7 @@
 >
 > Samuel Taylor Coleridge, *The Rime of the Ancient Mariner* (1798)
 
-A 3D game in OpenGL inspired by Coleridge's poem: a lighthouse island in the open sea, a small boat, and cargo adrift on the water.
+A 3D game in OpenGL inspired by Coleridge's poem: a lighthouse island in the open sea, a small boat, cargo adrift on the water, and an albatross circling the light.
 
 ## Build (Linux)
 

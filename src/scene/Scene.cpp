@@ -1,5 +1,6 @@
 #include "scene/Scene.hpp"
 
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -31,6 +32,12 @@ namespace gps {
     const float MOON_SHADOW_DISTANCE = 150.0f;
     const GLuint MOON_SHADOW_UNIT = 5;
     const GLuint BEAM_SHADOW_UNIT = 6;
+
+    const float ALBATROSS_RADIUS = 26.0f;
+    const float ALBATROSS_HEIGHT = 25.0f;
+    const float ALBATROSS_SPEED = 9.0f;
+    const float ALBATROSS_BANK = 28.0f;
+    const float ALBATROSS_FLAP_SPEED = 2.2f;
 
     const int RAIN_DROP_COUNT = 12000;
     const glm::vec3 LIGHTNING_COLOR = glm::vec3(1.4f, 1.5f, 1.8f);
@@ -81,6 +88,7 @@ namespace gps {
         boat.LoadModel("assets/models/boat/boat.obj");
         ship.LoadModel("assets/models/ship/ship.obj");
         crate.LoadModel("assets/models/crate/crate.obj");
+        albatross.LoadModel("assets/models/albatross/albatross.obj");
 
         for(int i = 0; i < 3; i++)
             rocks[i].LoadModel("assets/models/rocks/rock_" + std::to_string(i + 1) + ".obj");
@@ -116,6 +124,10 @@ namespace gps {
         setFloating(add(crate, glm::vec3(-16.0f, 0.0f, 40.0f), 70.0f, 1.0f), 0.22f, 1.17f, 0.53f);
         setFloating(add(crate, glm::vec3(8.0f, 0.0f, 36.0f), 140.0f, 1.0f), 0.22f, 1.17f, 0.53f);
         setFloating(add(crate, glm::vec3(-38.0f, 0.0f, -4.0f), 200.0f, 1.0f), 0.22f, 1.17f, 0.53f);
+
+        albatrossPrevious = albatrossPathPoint(albatrossAngle, albatrossTime);
+        add(albatross, albatrossPrevious, 0.0f, 1.0f);
+        albatrossIndex = (int)objects.size() - 1;
 
         add(rocks[0], glm::vec3(-34.0f, -0.8f, 8.0f), 0.0f, 1.6f);
         add(rocks[1], glm::vec3(-42.0f, -1.0f, -10.0f), 50.0f, 2.2f);
@@ -257,6 +269,41 @@ namespace gps {
         }
     }
 
+    glm::vec3 Scene::albatrossPathPoint(float angle, float time)
+    {
+        float radius = ALBATROSS_RADIUS + 5.0f * std::sin(time * 0.23f);
+        float height = ALBATROSS_HEIGHT + 3.5f * std::sin(time * 0.41f) + 1.2f * stormFactor * std::sin(time * 2.7f);
+        return glm::vec3(LIGHTHOUSE_POSITION.x + std::cos(angle) * radius, height, LIGHTHOUSE_POSITION.z + std::sin(angle) * radius);
+    }
+
+    void Scene::updateAlbatross(float deltaTime)
+    {
+        if(deltaTime <= 0.0f)
+            return;
+
+        albatrossTime += deltaTime;
+        albatrossAngle += ALBATROSS_SPEED / ALBATROSS_RADIUS * deltaTime;
+
+        SceneObject& bird = objects[albatrossIndex];
+        glm::vec3 position = albatrossPathPoint(albatrossAngle, albatrossTime);
+        glm::vec3 velocity = (position - albatrossPrevious) / deltaTime;
+        albatrossPrevious = position;
+
+        float horizontalSpeed = glm::length(glm::vec2(velocity.x, velocity.z));
+        float wobble = 10.0f * stormFactor * std::sin(albatrossTime * 3.1f);
+
+        bird.position = position;
+        bird.rotationDegrees.y = glm::degrees(std::atan2(-velocity.x, -velocity.z));
+        bird.rotationDegrees.x = glm::degrees(std::atan2(velocity.y, horizontalSpeed));
+        bird.rotationDegrees.z = wobble - ALBATROSS_BANK;
+
+        float cycle = glm::mix(6.0f, 3.5f, stormFactor);
+        float phase = std::fmod(albatrossTime, cycle);
+        float envelope = glm::smoothstep(0.0f, 0.25f, phase) * (1.0f - glm::smoothstep(1.2f, 1.5f, phase));
+        float stroke = std::sin(2.0f * glm::pi<float>() * ALBATROSS_FLAP_SPEED * albatrossTime);
+        bird.wingFlap = glm::radians(5.0f + envelope * 32.0f * stroke);
+    }
+
     void Scene::update(float deltaTime, glm::vec3 cameraPosition, glm::vec3 viewDirection)
     {
         float target = weather == Weather::Storm ? 1.0f : 0.0f;
@@ -264,6 +311,7 @@ namespace gps {
         stormFactor += glm::clamp(target - stormFactor, -step, step);
         water.update(deltaTime, stormFactor);
         updateFloating();
+        updateAlbatross(deltaTime);
         wind.update(deltaTime, stormFactor);
         rain.update(deltaTime, wind.getVelocity(), glm::smoothstep(0.3f, 1.0f, stormFactor));
         lightning.update(deltaTime, stormFactor, cameraPosition, viewDirection);
@@ -294,6 +342,7 @@ namespace gps {
     void Scene::drawDepth(gps::Shader depthShader, gps::ShadowMap& shadowMap, glm::mat4 lightSpace, bool includeLighthouse)
     {
         GLint modelLoc = glGetUniformLocation(depthShader.shaderProgram, "model");
+        GLint wingFlapLoc = glGetUniformLocation(depthShader.shaderProgram, "wingFlap");
         glUniformMatrix4fv(glGetUniformLocation(depthShader.shaderProgram, "lightSpace"), 1, GL_FALSE, glm::value_ptr(lightSpace));
 
         shadowMap.begin();
@@ -302,6 +351,7 @@ namespace gps {
             if(!includeLighthouse && object.model == &lighthouse)
                 continue;
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(object.getModelMatrix()));
+            glUniform1f(wingFlapLoc, object.wingFlap);
             object.model->Draw(depthShader);
         }
         shadowMap.end();
@@ -373,6 +423,7 @@ namespace gps {
     void Scene::draw(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc, GLint emissiveLoc)
     {
         shader.useShaderProgram();
+        GLint wingFlapLoc = glGetUniformLocation(shader.shaderProgram, "wingFlap");
 
         for(SceneObject& object : objects)
         {
@@ -382,6 +433,7 @@ namespace gps {
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
             glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
             glUniform1f(emissiveLoc, object.emissiveStrength);
+            glUniform1f(wingFlapLoc, object.wingFlap);
             object.model->Draw(shader);
         }
     }
