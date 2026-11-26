@@ -2,8 +2,7 @@ CMakeFiles/app.dir/src/scene/Scene.cpp.o: \
  /home/pel/pg_project/OpenGL\ Project\ Core/src/scene/Scene.cpp \
  /usr/include/stdc-predef.h \
  /home/pel/pg_project/OpenGL\ Project\ Core/src/scene/Scene.hpp \
- /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Model3D.hpp \
- /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Mesh.hpp \
+ /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Lights.hpp \
  /home/pel/pg_project/OpenGL\ Project\ Core/src/core/OpenGL.hpp \
  /usr/include/GL/glew.h /usr/include/c++/16/cstddef \
  /usr/include/x86_64-linux-gnu/c++/16/bits/c++config.h \
@@ -28,73 +27,34 @@ CMakeFiles/app.dir/src/scene/Scene.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h /usr/include/GL/glu.h \
- /usr/include/GL/gl.h /usr/include/GLFW/glfw3.h \
- /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Shader.hpp \
- /usr/include/c++/16/string /usr/include/c++/16/bits/requires_hosted.h \
- /usr/include/c++/16/bits/stringfwd.h \
- /usr/include/c++/16/bits/memoryfwd.h \
- /usr/include/c++/16/bits/char_traits.h \
- /usr/include/c++/16/bits/postypes.h /usr/include/c++/16/cwchar \
- /usr/include/wchar.h /usr/include/x86_64-linux-gnu/bits/floatn.h \
+ /usr/include/GL/gl.h /usr/include/GLFW/glfw3.h /usr/include/glm/glm.hpp \
+ /usr/include/glm/detail/_fixes.hpp /usr/include/c++/16/cmath \
+ /usr/include/c++/16/bits/requires_hosted.h \
+ /usr/include/c++/16/bits/cpp_type_traits.h \
+ /usr/include/c++/16/type_traits /usr/include/c++/16/ext/type_traits.h \
+ /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn.h \
  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
- /usr/lib/gcc/x86_64-linux-gnu/16/include/stdarg.h \
- /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
- /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
+ /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+ /usr/include/c++/16/bits/std_abs.h /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+ /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
- /usr/include/c++/16/type_traits /usr/include/c++/16/bits/allocator.h \
- /usr/include/x86_64-linux-gnu/c++/16/bits/c++allocator.h \
- /usr/include/c++/16/bits/new_allocator.h /usr/include/c++/16/new \
- /usr/include/c++/16/bits/exception.h \
- /usr/include/c++/16/bits/new_except.h \
- /usr/include/c++/16/bits/exception_defines.h \
- /usr/include/c++/16/bits/new_throw.h /usr/include/c++/16/bits/move.h \
- /usr/include/c++/16/bits/cpp_type_traits.h \
- /usr/include/c++/16/bits/localefwd.h \
- /usr/include/x86_64-linux-gnu/c++/16/bits/c++locale.h \
- /usr/include/c++/16/clocale /usr/include/locale.h \
- /usr/include/x86_64-linux-gnu/bits/locale.h /usr/include/c++/16/iosfwd \
- /usr/include/c++/16/cctype /usr/include/ctype.h \
- /usr/include/x86_64-linux-gnu/bits/endian.h \
- /usr/include/x86_64-linux-gnu/bits/endianness.h \
- /usr/include/c++/16/bits/ostream_insert.h \
- /usr/include/c++/16/bits/cxxabi_forced.h \
- /usr/include/c++/16/bits/stl_iterator_base_funcs.h \
- /usr/include/c++/16/bits/concept_check.h \
- /usr/include/c++/16/debug/assertions.h \
- /usr/include/c++/16/bits/stl_iterator_base_types.h \
- /usr/include/c++/16/bits/stl_iterator.h \
- /usr/include/c++/16/ext/type_traits.h \
- /usr/include/c++/16/bits/ptr_traits.h \
- /usr/include/c++/16/bits/stl_function.h \
- /usr/include/c++/16/backward/binders.h \
- /usr/include/c++/16/ext/numeric_traits.h \
- /usr/include/c++/16/bits/stdexcept_throw.h \
- /usr/include/c++/16/bits/stdexcept_throwfwd.h \
- /usr/include/c++/16/bits/stl_algobase.h \
- /usr/include/c++/16/bits/stl_pair.h /usr/include/c++/16/bits/utility.h \
- /usr/include/c++/16/debug/debug.h \
- /usr/include/c++/16/bits/predefined_ops.h /usr/include/c++/16/bit \
- /usr/include/c++/16/concepts /usr/include/c++/16/bits/range_access.h \
- /usr/include/c++/16/initializer_list /usr/include/c++/16/bits/erase_if.h \
- /usr/include/c++/16/bits/basic_string.h \
- /usr/include/c++/16/ext/alloc_traits.h \
- /usr/include/c++/16/bits/alloc_traits.h \
- /usr/include/c++/16/bits/stl_construct.h /usr/include/c++/16/string_view \
- /usr/include/c++/16/bits/functional_hash.h \
- /usr/include/c++/16/bits/hash_bytes.h \
- /usr/include/c++/16/bits/string_view.tcc \
- /usr/include/c++/16/ext/string_conversions.h /usr/include/c++/16/cstdlib \
- /usr/include/stdlib.h /usr/include/x86_64-linux-gnu/bits/waitflags.h \
- /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
  /usr/include/x86_64-linux-gnu/sys/types.h \
  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/timer_t.h /usr/include/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/endianness.h \
  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
  /usr/include/x86_64-linux-gnu/sys/select.h \
@@ -110,34 +70,24 @@ CMakeFiles/app.dir/src/scene/Scene.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
- /usr/include/c++/16/bits/std_abs.h /usr/include/c++/16/cstdio \
- /usr/include/stdio.h /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
- /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
- /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
- /usr/include/c++/16/cerrno /usr/include/errno.h \
- /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
- /usr/include/x86_64-linux-gnu/asm/errno.h \
- /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
- /usr/include/c++/16/bits/charconv.h \
- /usr/include/c++/16/bits/basic_string.tcc \
- /usr/include/c++/16/bits/memory_resource.h \
- /usr/include/c++/16/bits/uses_allocator.h \
- /usr/include/c++/16/bits/uses_allocator_args.h /usr/include/c++/16/tuple \
- /usr/include/c++/16/bits/invoke.h /usr/include/glm/glm.hpp \
- /usr/include/glm/detail/_fixes.hpp /usr/include/c++/16/cmath \
- /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/math-vector.h \
- /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
- /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
- /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
- /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
- /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
- /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
- /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
- /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
- /usr/include/c++/16/bits/specfun.h /usr/include/c++/16/limits \
+ /usr/include/c++/16/bits/specfun.h \
+ /usr/include/c++/16/bits/stdexcept_throw.h \
+ /usr/include/c++/16/bits/exception_defines.h \
+ /usr/include/c++/16/bits/stdexcept_throwfwd.h \
+ /usr/include/c++/16/bits/stl_algobase.h \
+ /usr/include/c++/16/ext/numeric_traits.h \
+ /usr/include/c++/16/bits/stl_pair.h /usr/include/c++/16/bits/move.h \
+ /usr/include/c++/16/bits/utility.h \
+ /usr/include/c++/16/bits/stl_iterator_base_types.h \
+ /usr/include/c++/16/bits/stl_iterator_base_funcs.h \
+ /usr/include/c++/16/bits/concept_check.h \
+ /usr/include/c++/16/debug/assertions.h \
+ /usr/include/c++/16/bits/stl_iterator.h \
+ /usr/include/c++/16/bits/ptr_traits.h /usr/include/c++/16/debug/debug.h \
+ /usr/include/c++/16/bits/predefined_ops.h \
+ /usr/include/c++/16/bits/stl_function.h \
+ /usr/include/c++/16/backward/binders.h /usr/include/c++/16/bit \
+ /usr/include/c++/16/concepts /usr/include/c++/16/limits \
  /usr/include/c++/16/tr1/gamma.tcc \
  /usr/include/c++/16/tr1/special_function_util.h \
  /usr/include/c++/16/tr1/bessel_function.tcc \
@@ -273,11 +223,64 @@ CMakeFiles/app.dir/src/scene/Scene.cpp.o: \
  /usr/include/glm/packing.hpp /usr/include/glm/detail/func_packing.inl \
  /usr/include/glm/detail/type_half.hpp \
  /usr/include/glm/detail/type_half.inl /usr/include/glm/integer.hpp \
- /usr/include/glm/detail/func_integer.inl /usr/include/c++/16/vector \
+ /usr/include/glm/detail/func_integer.inl /usr/include/c++/16/string \
+ /usr/include/c++/16/bits/stringfwd.h \
+ /usr/include/c++/16/bits/memoryfwd.h \
+ /usr/include/c++/16/bits/char_traits.h \
+ /usr/include/c++/16/bits/postypes.h /usr/include/c++/16/cwchar \
+ /usr/include/wchar.h /usr/lib/gcc/x86_64-linux-gnu/16/include/stdarg.h \
+ /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
+ /usr/include/c++/16/bits/allocator.h \
+ /usr/include/x86_64-linux-gnu/c++/16/bits/c++allocator.h \
+ /usr/include/c++/16/bits/new_allocator.h /usr/include/c++/16/new \
+ /usr/include/c++/16/bits/exception.h \
+ /usr/include/c++/16/bits/new_except.h \
+ /usr/include/c++/16/bits/new_throw.h \
+ /usr/include/c++/16/bits/localefwd.h \
+ /usr/include/x86_64-linux-gnu/c++/16/bits/c++locale.h \
+ /usr/include/c++/16/clocale /usr/include/locale.h \
+ /usr/include/x86_64-linux-gnu/bits/locale.h /usr/include/c++/16/iosfwd \
+ /usr/include/c++/16/cctype /usr/include/ctype.h \
+ /usr/include/c++/16/bits/ostream_insert.h \
+ /usr/include/c++/16/bits/cxxabi_forced.h \
+ /usr/include/c++/16/bits/range_access.h \
+ /usr/include/c++/16/initializer_list /usr/include/c++/16/bits/erase_if.h \
+ /usr/include/c++/16/bits/basic_string.h \
+ /usr/include/c++/16/ext/alloc_traits.h \
+ /usr/include/c++/16/bits/alloc_traits.h \
+ /usr/include/c++/16/bits/stl_construct.h /usr/include/c++/16/string_view \
+ /usr/include/c++/16/bits/functional_hash.h \
+ /usr/include/c++/16/bits/hash_bytes.h \
+ /usr/include/c++/16/bits/string_view.tcc \
+ /usr/include/c++/16/ext/string_conversions.h /usr/include/c++/16/cstdlib \
+ /usr/include/c++/16/cstdio /usr/include/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/c++/16/cerrno /usr/include/errno.h \
+ /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
+ /usr/include/c++/16/bits/charconv.h \
+ /usr/include/c++/16/bits/basic_string.tcc \
+ /usr/include/c++/16/bits/memory_resource.h \
+ /usr/include/c++/16/bits/uses_allocator.h \
+ /usr/include/c++/16/bits/uses_allocator_args.h /usr/include/c++/16/tuple \
+ /usr/include/c++/16/bits/invoke.h /usr/include/c++/16/vector \
  /usr/include/c++/16/bits/stl_uninitialized.h \
  /usr/include/c++/16/bits/stl_vector.h \
  /usr/include/c++/16/bits/stl_bvector.h \
  /usr/include/c++/16/bits/vector.tcc \
+ /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Model3D.hpp \
+ /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Mesh.hpp \
+ /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Shader.hpp \
  /usr/include/glm/gtc/matrix_transform.hpp \
  /usr/include/glm/ext/matrix_projection.hpp \
  /usr/include/glm/gtc/constants.hpp \

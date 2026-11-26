@@ -24,6 +24,8 @@ namespace gps {
             return DIFFUSE_TEXTURE_UNIT;
         if(type == "specularTexture")
             return SPECULAR_TEXTURE_UNIT;
+        if(type == "emissiveTexture")
+            return EMISSIVE_TEXTURE_UNIT;
         return AMBIENT_TEXTURE_UNIT;
     }
 

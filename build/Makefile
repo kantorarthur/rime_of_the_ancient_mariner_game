@@ -226,6 +226,30 @@ src/core/Window.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/core/Window.cpp.s
 .PHONY : src/core/Window.cpp.s
 
+src/graphics/Lights.o: src/graphics/Lights.cpp.o
+.PHONY : src/graphics/Lights.o
+
+# target to build an object file
+src/graphics/Lights.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/graphics/Lights.cpp.o
+.PHONY : src/graphics/Lights.cpp.o
+
+src/graphics/Lights.i: src/graphics/Lights.cpp.i
+.PHONY : src/graphics/Lights.i
+
+# target to preprocess a source file
+src/graphics/Lights.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/graphics/Lights.cpp.i
+.PHONY : src/graphics/Lights.cpp.i
+
+src/graphics/Lights.s: src/graphics/Lights.cpp.s
+.PHONY : src/graphics/Lights.s
+
+# target to generate assembly for a file
+src/graphics/Lights.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/graphics/Lights.cpp.s
+.PHONY : src/graphics/Lights.cpp.s
+
 src/graphics/Mesh.o: src/graphics/Mesh.cpp.o
 .PHONY : src/graphics/Mesh.o
 
@@ -394,6 +418,30 @@ src/scene/Scene.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/scene/Scene.cpp.s
 .PHONY : src/scene/Scene.cpp.s
 
+src/scene/Skybox.o: src/scene/Skybox.cpp.o
+.PHONY : src/scene/Skybox.o
+
+# target to build an object file
+src/scene/Skybox.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/scene/Skybox.cpp.o
+.PHONY : src/scene/Skybox.cpp.o
+
+src/scene/Skybox.i: src/scene/Skybox.cpp.i
+.PHONY : src/scene/Skybox.i
+
+# target to preprocess a source file
+src/scene/Skybox.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/scene/Skybox.cpp.i
+.PHONY : src/scene/Skybox.cpp.i
+
+src/scene/Skybox.s: src/scene/Skybox.cpp.s
+.PHONY : src/scene/Skybox.s
+
+# target to generate assembly for a file
+src/scene/Skybox.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/scene/Skybox.cpp.s
+.PHONY : src/scene/Skybox.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -415,6 +463,9 @@ help:
 	@echo "... src/core/Window.o"
 	@echo "... src/core/Window.i"
 	@echo "... src/core/Window.s"
+	@echo "... src/graphics/Lights.o"
+	@echo "... src/graphics/Lights.i"
+	@echo "... src/graphics/Lights.s"
 	@echo "... src/graphics/Mesh.o"
 	@echo "... src/graphics/Mesh.i"
 	@echo "... src/graphics/Mesh.s"
@@ -436,6 +487,9 @@ help:
 	@echo "... src/scene/Scene.o"
 	@echo "... src/scene/Scene.i"
 	@echo "... src/scene/Scene.s"
+	@echo "... src/scene/Skybox.o"
+	@echo "... src/scene/Skybox.i"
+	@echo "... src/scene/Skybox.s"
 .PHONY : help
 
 

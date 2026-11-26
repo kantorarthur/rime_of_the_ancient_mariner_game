@@ -1,0 +1,36 @@
+# Blender sources and 4K source textures
+assets_src/
+*.blend
+*.blend1
+*.blend2
+
+# Build output
+build/
+out/
+bin/
+cmake-build-*/
+x64/
+Debug/
+Release/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.exe
+*.out
+*.pdb
+*.ilk
+*.o
+*.a
+*.so
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# OS
+.DS_Store
+Thumbs.db

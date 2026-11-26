@@ -55,4 +55,26 @@ diffuse "$SRC/rock_boulder_dry_4k.blend/textures/rock_boulder_dry_diff_4k.jpg" "
 spec "$SRC/rock_boulder_dry_4k.blend/textures/rock_boulder_dry_rough_4k.exr" "$OUT/rocks/rock_dry_spec.png" 512 0
 diffuse "$SRC/coast_sand_rocks_02_4k.blend/textures/coast_sand_rocks_02_diff_4k.jpg" "$OUT/island/ground_diff.jpg" 2048
 
+conv "{\"name\":\"ship\",\"src\":\"$SRC/dutch_ship_large_01_4k.blend/dutch_ship_large_01_4k.blend\",\"outdir\":\"$OUT/ship\",\"scale\":1.0,\"max_tris\":36000}"
+SHIP="$SRC/dutch_ship_large_01_4k.blend/textures"
+diffuse "$SHIP/dutch_ship_large_01_hull_diff_4k.png" "$OUT/ship/hull_diff.jpg" 2048
+diffuse "$SHIP/dutch_ship_large_01_rigging_diff_4k.png" "$OUT/ship/rigging_diff.jpg" 2048
+convert "$SHIP/dutch_ship_large_01_sails_diff_4k.png" "$SHIP/dutch_ship_large_01_sails_alpha_4k.png" -alpha off -compose CopyOpacity -composite -resize 1024x1024 -define png:compression-level=9 "$OUT/ship/sails_diff.png"
+spec "$SHIP/dutch_ship_large_01_hull_rough_4k.png" "$OUT/ship/hull_spec.png" 1024 0
+
+blender -b --disable-autoexec --factory-startup -P "$TOOLS/make_albatross.py" -- "{\"src\":\"$SRC/Low Poly Seagull/Seagull - rev001.blend\",\"outdir\":\"$OUT/albatross\",\"wingspan\":3.0,\"subdivisions\":2,\"feather_strength\":0.25,\"dark_start\":0.4}" 2>&1 | grep -E "^RESULT|Traceback" || true
+
 python3 "$TOOLS/write_materials.py" "$OUT"
+
+SKY="$ROOT/assets/skybox"
+sky()
+{
+    blender -b --disable-autoexec --factory-startup -P "$TOOLS/hdri2cubemap.py" -- "$1" 2>&1 | grep -E "^MOON|Traceback" || true
+    for face in "$2"/*.png
+    do
+        convert "$face" -quality 92 "${face%.png}.jpg"
+        rm "$face"
+    done
+}
+sky "{\"src\":\"$SRC/clarens_night_02_4k.exr\",\"outdir\":\"$SKY/calm\",\"size\":1024,\"exposure\":1.0,\"rotate\":12,\"horizon_color_srgb\":[0.07,0.09,0.13],\"horizon_low\":12.0,\"horizon_high\":20.0,\"horizon_low_near_moon\":1.0,\"horizon_high_near_moon\":10.0,\"moon_width\":30}" "$SKY/calm"
+sky "{\"src\":\"$SRC/clarens_night_01_4k.exr\",\"outdir\":\"$SKY/storm\",\"size\":1024,\"exposure\":0.45,\"saturation\":0.35,\"tint\":[0.85,0.92,1.05],\"rotate\":12,\"horizon_color_srgb\":[0.05,0.06,0.07],\"horizon_low\":12.0,\"horizon_high\":20.0,\"horizon_low_near_moon\":1.0,\"horizon_high_near_moon\":10.0,\"moon_width\":30}" "$SKY/storm"

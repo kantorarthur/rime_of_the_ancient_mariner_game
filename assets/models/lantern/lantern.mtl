@@ -7,3 +7,4 @@ map_Ks lantern_spec.png
 newmtl wooden_lantern_01_glass
 Kd 1.000 0.860 0.550
 Ks 0.800 0.800 0.800
+Ke 1.000 0.620 0.250

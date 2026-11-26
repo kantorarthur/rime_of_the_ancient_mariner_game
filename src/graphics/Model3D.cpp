@@ -131,8 +131,10 @@ namespace gps {
 
                 glm::vec3 diffuseColor(1.0f);
                 glm::vec3 specularColor(0.2f);
+                glm::vec3 emissiveColor(0.0f);
                 std::string diffuseName;
                 std::string specularName;
+                std::string emissiveName;
 
                 if(materialId >= 0)
                 {
@@ -141,11 +143,14 @@ namespace gps {
                     specularColor = glm::vec3(material.specular[0], material.specular[1], material.specular[2]);
                     diffuseName = material.diffuse_texname;
                     specularName = material.specular_texname;
+                    emissiveColor = glm::vec3(material.emission[0], material.emission[1], material.emission[2]);
+                    emissiveName = material.emissive_texname;
                 }
 
                 std::vector<gps::Texture> textures;
                 textures.push_back(LoadTexture(basePath, diffuseName, "diffuseTexture", true, diffuseColor));
                 textures.push_back(LoadTexture(basePath, specularName, "specularTexture", false, specularColor));
+                textures.push_back(LoadTexture(basePath, emissiveName, "emissiveTexture", true, emissiveColor));
 
                 meshes.push_back(gps::Mesh(vertices, indices, textures));
             }

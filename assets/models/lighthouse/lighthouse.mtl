@@ -3,3 +3,4 @@ Kd 1.000 1.000 1.000
 Ks 1.000 1.000 1.000
 map_Kd lighthouse_diff.jpg
 map_Ks lighthouse_spec.png
+map_Ke lighthouse_emissive.png

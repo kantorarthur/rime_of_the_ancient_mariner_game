@@ -125,10 +125,24 @@ CMakeFiles/app.dir/src/core/Window.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/core/Window.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/pel/pg_project/OpenGL Project Core/src/core/Window.cpp" -o CMakeFiles/app.dir/src/core/Window.cpp.s
 
+CMakeFiles/app.dir/src/graphics/Lights.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/graphics/Lights.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Lights.cpp
+CMakeFiles/app.dir/src/graphics/Lights.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/app.dir/src/graphics/Lights.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/graphics/Lights.cpp.o -MF CMakeFiles/app.dir/src/graphics/Lights.cpp.o.d -o CMakeFiles/app.dir/src/graphics/Lights.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/graphics/Lights.cpp"
+
+CMakeFiles/app.dir/src/graphics/Lights.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/graphics/Lights.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/pel/pg_project/OpenGL Project Core/src/graphics/Lights.cpp" > CMakeFiles/app.dir/src/graphics/Lights.cpp.i
+
+CMakeFiles/app.dir/src/graphics/Lights.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/graphics/Lights.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/pel/pg_project/OpenGL Project Core/src/graphics/Lights.cpp" -o CMakeFiles/app.dir/src/graphics/Lights.cpp.s
+
 CMakeFiles/app.dir/src/graphics/Mesh.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/graphics/Mesh.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Mesh.cpp
 CMakeFiles/app.dir/src/graphics/Mesh.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/app.dir/src/graphics/Mesh.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/app.dir/src/graphics/Mesh.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/graphics/Mesh.cpp.o -MF CMakeFiles/app.dir/src/graphics/Mesh.cpp.o.d -o CMakeFiles/app.dir/src/graphics/Mesh.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/graphics/Mesh.cpp"
 
 CMakeFiles/app.dir/src/graphics/Mesh.cpp.i: cmake_force
@@ -142,7 +156,7 @@ CMakeFiles/app.dir/src/graphics/Mesh.cpp.s: cmake_force
 CMakeFiles/app.dir/src/graphics/Model3D.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/graphics/Model3D.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Model3D.cpp
 CMakeFiles/app.dir/src/graphics/Model3D.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/app.dir/src/graphics/Model3D.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/app.dir/src/graphics/Model3D.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/graphics/Model3D.cpp.o -MF CMakeFiles/app.dir/src/graphics/Model3D.cpp.o.d -o CMakeFiles/app.dir/src/graphics/Model3D.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/graphics/Model3D.cpp"
 
 CMakeFiles/app.dir/src/graphics/Model3D.cpp.i: cmake_force
@@ -156,7 +170,7 @@ CMakeFiles/app.dir/src/graphics/Model3D.cpp.s: cmake_force
 CMakeFiles/app.dir/src/graphics/Shader.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/graphics/Shader.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Shader.cpp
 CMakeFiles/app.dir/src/graphics/Shader.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/app.dir/src/graphics/Shader.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/app.dir/src/graphics/Shader.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/graphics/Shader.cpp.o -MF CMakeFiles/app.dir/src/graphics/Shader.cpp.o.d -o CMakeFiles/app.dir/src/graphics/Shader.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/graphics/Shader.cpp"
 
 CMakeFiles/app.dir/src/graphics/Shader.cpp.i: cmake_force
@@ -170,7 +184,7 @@ CMakeFiles/app.dir/src/graphics/Shader.cpp.s: cmake_force
 CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/ViewMode.cpp
 CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o -MF CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o.d -o CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/graphics/ViewMode.cpp"
 
 CMakeFiles/app.dir/src/graphics/ViewMode.cpp.i: cmake_force
@@ -184,7 +198,7 @@ CMakeFiles/app.dir/src/graphics/ViewMode.cpp.s: cmake_force
 CMakeFiles/app.dir/src/main.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/main.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/main.cpp
 CMakeFiles/app.dir/src/main.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/app.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/app.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/main.cpp.o -MF CMakeFiles/app.dir/src/main.cpp.o.d -o CMakeFiles/app.dir/src/main.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/main.cpp"
 
 CMakeFiles/app.dir/src/main.cpp.i: cmake_force
@@ -198,7 +212,7 @@ CMakeFiles/app.dir/src/main.cpp.s: cmake_force
 CMakeFiles/app.dir/src/scene/Camera.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/scene/Camera.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/scene/Camera.cpp
 CMakeFiles/app.dir/src/scene/Camera.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/app.dir/src/scene/Camera.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/app.dir/src/scene/Camera.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/scene/Camera.cpp.o -MF CMakeFiles/app.dir/src/scene/Camera.cpp.o.d -o CMakeFiles/app.dir/src/scene/Camera.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/scene/Camera.cpp"
 
 CMakeFiles/app.dir/src/scene/Camera.cpp.i: cmake_force
@@ -212,7 +226,7 @@ CMakeFiles/app.dir/src/scene/Camera.cpp.s: cmake_force
 CMakeFiles/app.dir/src/scene/Scene.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/scene/Scene.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/scene/Scene.cpp
 CMakeFiles/app.dir/src/scene/Scene.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/app.dir/src/scene/Scene.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/app.dir/src/scene/Scene.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/scene/Scene.cpp.o -MF CMakeFiles/app.dir/src/scene/Scene.cpp.o.d -o CMakeFiles/app.dir/src/scene/Scene.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/scene/Scene.cpp"
 
 CMakeFiles/app.dir/src/scene/Scene.cpp.i: cmake_force
@@ -223,19 +237,35 @@ CMakeFiles/app.dir/src/scene/Scene.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/scene/Scene.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/pel/pg_project/OpenGL Project Core/src/scene/Scene.cpp" -o CMakeFiles/app.dir/src/scene/Scene.cpp.s
 
+CMakeFiles/app.dir/src/scene/Skybox.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/scene/Skybox.cpp.o: /home/pel/pg_project/OpenGL\ Project\ Core/src/scene/Skybox.cpp
+CMakeFiles/app.dir/src/scene/Skybox.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/app.dir/src/scene/Skybox.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/scene/Skybox.cpp.o -MF CMakeFiles/app.dir/src/scene/Skybox.cpp.o.d -o CMakeFiles/app.dir/src/scene/Skybox.cpp.o -c "/home/pel/pg_project/OpenGL Project Core/src/scene/Skybox.cpp"
+
+CMakeFiles/app.dir/src/scene/Skybox.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/scene/Skybox.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/pel/pg_project/OpenGL Project Core/src/scene/Skybox.cpp" > CMakeFiles/app.dir/src/scene/Skybox.cpp.i
+
+CMakeFiles/app.dir/src/scene/Skybox.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/scene/Skybox.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/pel/pg_project/OpenGL Project Core/src/scene/Skybox.cpp" -o CMakeFiles/app.dir/src/scene/Skybox.cpp.s
+
 # Object files for target app
 app_OBJECTS = \
 "CMakeFiles/app.dir/external/stb_image.cpp.o" \
 "CMakeFiles/app.dir/external/tiny_obj_loader.cpp.o" \
 "CMakeFiles/app.dir/src/core/Input.cpp.o" \
 "CMakeFiles/app.dir/src/core/Window.cpp.o" \
+"CMakeFiles/app.dir/src/graphics/Lights.cpp.o" \
 "CMakeFiles/app.dir/src/graphics/Mesh.cpp.o" \
 "CMakeFiles/app.dir/src/graphics/Model3D.cpp.o" \
 "CMakeFiles/app.dir/src/graphics/Shader.cpp.o" \
 "CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o" \
 "CMakeFiles/app.dir/src/main.cpp.o" \
 "CMakeFiles/app.dir/src/scene/Camera.cpp.o" \
-"CMakeFiles/app.dir/src/scene/Scene.cpp.o"
+"CMakeFiles/app.dir/src/scene/Scene.cpp.o" \
+"CMakeFiles/app.dir/src/scene/Skybox.cpp.o"
 
 # External object files for target app
 app_EXTERNAL_OBJECTS =
@@ -244,6 +274,7 @@ app: CMakeFiles/app.dir/external/stb_image.cpp.o
 app: CMakeFiles/app.dir/external/tiny_obj_loader.cpp.o
 app: CMakeFiles/app.dir/src/core/Input.cpp.o
 app: CMakeFiles/app.dir/src/core/Window.cpp.o
+app: CMakeFiles/app.dir/src/graphics/Lights.cpp.o
 app: CMakeFiles/app.dir/src/graphics/Mesh.cpp.o
 app: CMakeFiles/app.dir/src/graphics/Model3D.cpp.o
 app: CMakeFiles/app.dir/src/graphics/Shader.cpp.o
@@ -251,13 +282,14 @@ app: CMakeFiles/app.dir/src/graphics/ViewMode.cpp.o
 app: CMakeFiles/app.dir/src/main.cpp.o
 app: CMakeFiles/app.dir/src/scene/Camera.cpp.o
 app: CMakeFiles/app.dir/src/scene/Scene.cpp.o
+app: CMakeFiles/app.dir/src/scene/Skybox.cpp.o
 app: CMakeFiles/app.dir/build.make
 app: /usr/lib/x86_64-linux-gnu/libGLEW.so
 app: /usr/lib/x86_64-linux-gnu/libglfw.so.3.3
 app: /usr/lib/x86_64-linux-gnu/libGLX.so
 app: /usr/lib/x86_64-linux-gnu/libOpenGL.so
 app: CMakeFiles/app.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/home/pel/pg_project/OpenGL Project Core/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable app"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/app.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

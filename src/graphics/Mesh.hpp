@@ -41,7 +41,8 @@ namespace gps {
 
     const GLuint DIFFUSE_TEXTURE_UNIT = 0;
     const GLuint SPECULAR_TEXTURE_UNIT = 1;
-    const GLuint AMBIENT_TEXTURE_UNIT = 2;
+    const GLuint EMISSIVE_TEXTURE_UNIT = 2;
+    const GLuint AMBIENT_TEXTURE_UNIT = 3;
 
     class Mesh
     {

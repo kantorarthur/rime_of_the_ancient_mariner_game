@@ -1,0 +1,15 @@
+newmtl dutch_ship_large_01_hull
+Kd 1.000 1.000 1.000
+Ks 1.000 1.000 1.000
+map_Kd hull_diff.jpg
+map_Ks hull_spec.png
+
+newmtl dutch_ship_large_01_rigging
+Kd 1.000 1.000 1.000
+Ks 0.080 0.080 0.080
+map_Kd rigging_diff.jpg
+
+newmtl dutch_ship_large_01_sails
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+map_Kd sails_diff.png

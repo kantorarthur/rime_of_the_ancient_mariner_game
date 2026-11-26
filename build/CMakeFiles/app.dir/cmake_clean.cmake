@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/app.dir/src/core/Input.cpp.o.d"
   "CMakeFiles/app.dir/src/core/Window.cpp.o"
   "CMakeFiles/app.dir/src/core/Window.cpp.o.d"
+  "CMakeFiles/app.dir/src/graphics/Lights.cpp.o"
+  "CMakeFiles/app.dir/src/graphics/Lights.cpp.o.d"
   "CMakeFiles/app.dir/src/graphics/Mesh.cpp.o"
   "CMakeFiles/app.dir/src/graphics/Mesh.cpp.o.d"
   "CMakeFiles/app.dir/src/graphics/Model3D.cpp.o"
@@ -21,6 +23,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/app.dir/src/scene/Camera.cpp.o.d"
   "CMakeFiles/app.dir/src/scene/Scene.cpp.o"
   "CMakeFiles/app.dir/src/scene/Scene.cpp.o.d"
+  "CMakeFiles/app.dir/src/scene/Skybox.cpp.o"
+  "CMakeFiles/app.dir/src/scene/Skybox.cpp.o.d"
   "app"
   "app.pdb"
 )

@@ -24,11 +24,21 @@
 - rock_boulder_dry (texture): https://polyhaven.com/a/rock_boulder_dry
 - rock_boulder_cracked (texture): https://polyhaven.com/a/rock_boulder_cracked
 - coast_sand_rocks_02 (texture): https://polyhaven.com/a/coast_sand_rocks_02
+- dutch_ship_large_01: https://polyhaven.com/a/dutch_ship_large_01
+- clarens_night_01 (HDRI, storm skybox): https://polyhaven.com/a/clarens_night_01
+- clarens_night_02 (HDRI, calm skybox): https://polyhaven.com/a/clarens_night_02
+
+## BlendSwap, CC0 (public domain)
+
+- **Albatross**: based on "Low Poly Seagull" by Nodelete, https://blendswap.com/blend/7419
+  (wings posed in flight, wing tips darkened and vertex colors baked into a texture by `tools/make_albatross.py`)
 
 ## Generated in this project
 
 - The rocks (`rocks/rock_1..3`), the island (`island/`) and the curved cliff ring (`cliff/cliff_ring`)
   are generated procedurally by `tools/convert.py` from the Poly Haven assets above.
+- The skyboxes (`assets/skybox/calm`, `assets/skybox/storm`) are cube maps made from the Poly Haven HDRIs above
+  by `tools/hdri2cubemap.py`; the land below the horizon is replaced with a sea haze.
 
 ## Text
 

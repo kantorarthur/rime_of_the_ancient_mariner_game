@@ -300,7 +300,9 @@ CMakeFiles/app.dir/src/main.cpp.o: \
  /usr/include/glm/gtc/matrix_transform.inl \
  /usr/include/glm/gtx/transform.inl \
  /home/pel/pg_project/OpenGL\ Project\ Core/src/scene/Scene.hpp \
+ /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Lights.hpp \
  /home/pel/pg_project/OpenGL\ Project\ Core/src/graphics/Model3D.hpp \
+ /home/pel/pg_project/OpenGL\ Project\ Core/src/scene/Skybox.hpp \
  /usr/include/glm/gtc/matrix_inverse.hpp \
  /usr/include/glm/detail/setup.hpp \
  /usr/include/glm/gtc/matrix_inverse.inl \
