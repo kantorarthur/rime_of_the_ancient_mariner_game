@@ -2,6 +2,7 @@
 #define Game_hpp
 
 #include "core/Input.hpp"
+#include "game/Cinematic.hpp"
 #include "game/Story.hpp"
 #include "graphics/TextRenderer.hpp"
 #include "scene/Camera.hpp"
@@ -26,6 +27,8 @@ namespace gps {
     private:
         ControlMode mode = ControlMode::Ship;
         Story story;
+        Cinematic cinematic;
+        bool albatrossFilmed = false;
         Chapter lastChapter = Chapter::Prologue;
 
         float orbitYaw = 150.0f;
@@ -39,6 +42,7 @@ namespace gps {
         void updateChaseCamera(float deltaTime, gps::Input& input, gps::Camera& camera, gps::Scene& scene);
         void updateFreeCamera(float deltaTime, gps::Input& input, gps::Camera& camera);
         void reactToStory(gps::Scene& scene);
+        void filmShooting(gps::Scene& scene);
         void drawShipStatus(gps::TextRenderer& text, gps::Scene& scene, int width, int height);
     };
 }

@@ -547,16 +547,59 @@ namespace gps {
         }
     }
 
-    void Scene::raiseCrossbow()
+    bool Scene::raiseCrossbow()
     {
         if(crossbowTimer >= 0.0f || isAlbatrossShot())
-            return;
+            return false;
 
         Character& mariner = characters[marinerCharacter];
         mariner.targetYaw = yawTowards(mariner, toShipLocal(objects[albatrossIndex].position));
         mariner.propVisible = true;
         playAnimation(marinerCharacter, "aim", true, 0.4f);
         crossbowTimer = 0.0f;
+        return true;
+    }
+
+    glm::vec3 Scene::characterPoint(int character, glm::vec3 localOffset)
+    {
+        return glm::vec3(characterMatrix(characters[character]) * glm::vec4(localOffset, 1.0f));
+    }
+
+    glm::vec3 Scene::characterHead(int character)
+    {
+        Character& person = characters[character];
+        glm::mat4 head = characterMatrix(person) * person.animator.getBoneTransform(person.mesh->findBone("Head"));
+        return glm::vec3(head[3]);
+    }
+
+    glm::vec3 Scene::shipPoint(glm::vec3 localPoint)
+    {
+        return toWorld(objects[shipIndex], localPoint);
+    }
+
+    int Scene::getMarinerCharacter()
+    {
+        return marinerCharacter;
+    }
+
+    std::vector<int>& Scene::getCrewCharacters()
+    {
+        return crewCharacters;
+    }
+
+    glm::vec3 Scene::getAlbatrossPosition()
+    {
+        return objects[albatrossIndex].position;
+    }
+
+    glm::vec3 Scene::getAlbatrossVelocity()
+    {
+        return albatrossVelocity;
+    }
+
+    float Scene::getAlbatrossArrival()
+    {
+        return albatrossFollow;
     }
 
     void Scene::updateCrossbow(float deltaTime)

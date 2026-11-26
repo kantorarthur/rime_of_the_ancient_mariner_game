@@ -68,10 +68,19 @@ namespace gps {
 
         void callAlbatross();
         void crewHailAlbatross();
-        void raiseCrossbow();
+        bool raiseCrossbow();
         bool isAlbatrossShot();
         void crewMourn();
         void setSailingWind(float strength);
+
+        glm::vec3 characterPoint(int character, glm::vec3 localOffset);
+        glm::vec3 characterHead(int character);
+        glm::vec3 shipPoint(glm::vec3 localPoint);
+        int getMarinerCharacter();
+        std::vector<int>& getCrewCharacters();
+        glm::vec3 getAlbatrossPosition();
+        glm::vec3 getAlbatrossVelocity();
+        float getAlbatrossArrival();
 
         void setShipControls(float sail, float helm);
         glm::vec3 getShipPosition();

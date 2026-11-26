@@ -37,10 +37,24 @@ namespace gps {
         story.update(deltaTime, glm::length(glm::vec2(scene.getShipPosition().x, scene.getShipPosition().z)));
         reactToStory(scene);
 
-        if(story.getChapter() == Chapter::Crossbow && input.wasKeyPressed(GLFW_KEY_X))
-            scene.raiseCrossbow();
+        if(story.getChapter() == Chapter::Crossbow && input.wasKeyPressed(GLFW_KEY_X) && scene.raiseCrossbow())
+            filmShooting(scene);
         if(story.getChapter() == Chapter::Crossbow && scene.isAlbatrossShot())
             story.albatrossShot();
+
+        if(story.getChapter() == Chapter::Albatross && !albatrossFilmed && scene.getAlbatrossArrival() > 0.8f)
+        {
+            albatrossFilmed = true;
+            cinematic.play({{ShotFocus::Albatross, 0, 6.0f}, {ShotFocus::Crew, 0, 2.5f}, {ShotFocus::Crew, 2, 2.5f}});
+        }
+
+        if(cinematic.isPlaying())
+        {
+            scene.setShipControls(0.0f, 0.0f);
+            cinematic.update(deltaTime, camera, scene);
+            return;
+        }
+        cinematic.update(deltaTime, camera, scene);
 
         if(mode == ControlMode::Ship)
         {
@@ -61,7 +75,10 @@ namespace gps {
             return;
 
         if(chapter == Chapter::Storm)
+        {
             scene.setWeather(Weather::Storm);
+            cinematic.play({{ShotFocus::ShipBow, 0, 7.0f}});
+        }
 
         if(chapter == Chapter::Albatross)
         {
@@ -74,9 +91,20 @@ namespace gps {
             scene.crewMourn();
 
         if(chapter == Chapter::Becalmed)
+        {
             scene.setSailingWind(0.0f);
+            cinematic.play({{ShotFocus::ShipWide, 0, 10.0f}});
+        }
 
         lastChapter = chapter;
+    }
+
+    void Game::filmShooting(gps::Scene& scene)
+    {
+        std::vector<Shot> shots = {{ShotFocus::Mariner, 0, 1.9f}, {ShotFocus::AlbatrossFall, 0, 3.6f}};
+        for(int i = 0; i < (int)scene.getCrewCharacters().size(); i++)
+            shots.push_back({ShotFocus::Crew, i, 2.4f});
+        cinematic.play(shots);
     }
 
     void Game::updateShip(gps::Input& input, gps::Scene& scene)
@@ -158,7 +186,14 @@ namespace gps {
     void Game::drawOverlay(gps::TextRenderer& text, gps::Scene& scene, int width, int height)
     {
         text.begin(width, height);
+        cinematic.drawBars(text, width, height);
         story.draw(text, width, height);
+
+        if(cinematic.isPlaying())
+        {
+            text.end();
+            return;
+        }
 
         if(mode == ControlMode::Ship && story.getChapter() != Chapter::Prologue)
             drawShipStatus(text, scene, width, height);
