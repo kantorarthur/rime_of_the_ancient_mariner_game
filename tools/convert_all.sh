@@ -65,6 +65,7 @@ spec "$SHIP/dutch_ship_large_01_hull_rough_4k.png" "$OUT/ship/hull_spec.png" 102
 blender -b --disable-autoexec --factory-startup -P "$TOOLS/make_albatross.py" -- "{\"src\":\"$SRC/Low Poly Seagull/Seagull - rev001.blend\",\"outdir\":\"$OUT/albatross\",\"wingspan\":3.0,\"subdivisions\":2,\"feather_strength\":0.25,\"dark_start\":0.4}" 2>&1 | grep -E "^RESULT|Traceback" || true
 
 python3 "$TOOLS/write_materials.py" "$OUT"
+python3 "$TOOLS/make_crossbow.py" "$OUT/crossbow"
 
 SKY="$ROOT/assets/skybox"
 sky()

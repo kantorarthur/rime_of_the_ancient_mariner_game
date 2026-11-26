@@ -12,6 +12,7 @@ namespace gps {
     const float CHASE_TARGET_HEIGHT = 9.0f;
     const float CHASE_SMOOTHING = 4.0f;
     const glm::vec4 HINT_COLOR = glm::vec4(0.8f, 0.8f, 0.8f, 0.85f);
+    const glm::vec4 PROMPT_COLOR = glm::vec4(0.95f, 0.55f, 0.45f, 0.95f);
 
     void Game::start(gps::Scene& scene)
     {
@@ -36,6 +37,11 @@ namespace gps {
         story.update(deltaTime, glm::length(glm::vec2(scene.getShipPosition().x, scene.getShipPosition().z)));
         reactToStory(scene);
 
+        if(story.getChapter() == Chapter::Crossbow && input.wasKeyPressed(GLFW_KEY_X))
+            scene.raiseCrossbow();
+        if(story.getChapter() == Chapter::Crossbow && scene.isAlbatrossShot())
+            story.albatrossShot();
+
         if(mode == ControlMode::Ship)
         {
             updateShip(input, scene);
@@ -56,6 +62,19 @@ namespace gps {
 
         if(chapter == Chapter::Storm)
             scene.setWeather(Weather::Storm);
+
+        if(chapter == Chapter::Albatross)
+        {
+            scene.callAlbatross();
+            scene.crewHailAlbatross();
+            scene.setWeather(Weather::Calm);
+        }
+
+        if(chapter == Chapter::Shot)
+            scene.crewMourn();
+
+        if(chapter == Chapter::Becalmed)
+            scene.setSailingWind(0.0f);
 
         lastChapter = chapter;
     }
@@ -143,6 +162,12 @@ namespace gps {
 
         if(mode == ControlMode::Ship && story.getChapter() != Chapter::Prologue)
             drawShipStatus(text, scene, width, height);
+
+        if(story.getChapter() == Chapter::Crossbow)
+        {
+            float promptScale = height / 300.0f;
+            text.drawTextCentered("X   take up the cross-bow", width * 0.5f, height * 0.82f, promptScale, PROMPT_COLOR);
+        }
 
         float scale = height / 600.0f;
         std::string hint;

@@ -25,6 +25,7 @@ Run the program from the project root, since the paths to `assets/` are relative
 | W / S | raise / lower the sails |
 | A / D | turn the helm left / right |
 | Mouse | look around the ship |
+| X | take up the cross-bow (when the story asks for it) |
 | C | switch between the ship and the free camera |
 | W A S D, Space / Left Ctrl | move the free camera |
 | Left Shift (hold) | free camera 3× faster |

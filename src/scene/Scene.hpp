@@ -24,6 +24,7 @@
 namespace gps {
 
     enum class Weather {Calm, Storm};
+    enum class AlbatrossState {CirclingLighthouse, FollowingShip, Falling, Floating};
 
     struct SceneObject
     {
@@ -65,6 +66,13 @@ namespace gps {
         bool isFogEnabled();
         void triggerLightning(glm::vec3 cameraPosition, glm::vec3 viewDirection);
 
+        void callAlbatross();
+        void crewHailAlbatross();
+        void raiseCrossbow();
+        bool isAlbatrossShot();
+        void crewMourn();
+        void setSailingWind(float strength);
+
         void setShipControls(float sail, float helm);
         glm::vec3 getShipPosition();
         float getShipHeadingDegrees();
@@ -82,6 +90,7 @@ namespace gps {
         gps::Model3D ship;
         gps::Model3D crate;
         gps::Model3D albatross;
+        gps::Model3D crossbow;
         gps::Model3D rocks[3];
 
         std::vector<SceneObject> objects;
@@ -116,7 +125,15 @@ namespace gps {
         float shipSailInput = 0.0f;
         float shipHelmInput = 0.0f;
 
+        int marinerCharacter = -1;
+        std::vector<int> crewCharacters;
+        float sailingWind = 1.0f;
+        float crossbowTimer = -1.0f;
+
         int albatrossIndex = -1;
+        AlbatrossState albatrossState = AlbatrossState::CirclingLighthouse;
+        float albatrossFollow = 0.0f;
+        glm::vec3 albatrossVelocity = glm::vec3(0.0f);
         float albatrossTime = 0.0f;
         float albatrossAngle = 0.0f;
         glm::vec3 albatrossPrevious = glm::vec3(0.0f);
@@ -138,7 +155,13 @@ namespace gps {
         void updateAlbatross(float deltaTime);
         void updateShip(float deltaTime);
         void placeObstacles();
-        glm::vec3 albatrossPathPoint(float angle, float time);
+        glm::vec3 albatrossPathPoint(glm::vec3 center, float radius, float height);
+        void flyAlbatross(float deltaTime);
+        void dropAlbatross(float deltaTime);
+        void updateCrossbow(float deltaTime);
+        void turnCharacters(float deltaTime);
+        float yawTowards(Character& character, glm::vec3 localTarget);
+        glm::vec3 toShipLocal(glm::vec3 worldPoint);
         void drawDepth(gps::Shader depthShader, glm::mat4 lightSpace, bool includeLighthouse);
         void setFloating(SceneObject& object, float draft, float length, float width);
         SceneObject& add(gps::Model3D& model, glm::vec3 position, float rotationY, float scale);

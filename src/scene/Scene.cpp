@@ -46,6 +46,13 @@ namespace gps {
     const float ALBATROSS_SPEED = 9.0f;
     const float ALBATROSS_BANK = 28.0f;
     const float ALBATROSS_FLAP_SPEED = 2.2f;
+    const float ALBATROSS_SHIP_RADIUS = 24.0f;
+    const float ALBATROSS_SHIP_HEIGHT = 24.0f;
+    const float ALBATROSS_ARRIVAL_TIME = 15.0f;
+    const float CHARACTER_TURN_SPEED = 150.0f;
+    const float CROSSBOW_AIM_TIME = 1.0f;
+    const float CROSSBOW_LOWER_TIME = 3.5f;
+    const glm::mat4 CROSSBOW_GRIP = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.06f));
 
     const std::string CHARACTER_FOLDER = "assets/characters/";
     const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4"};
@@ -104,6 +111,7 @@ namespace gps {
         ship.LoadModel("assets/models/ship/ship.obj");
         crate.LoadModel("assets/models/crate/crate.obj");
         albatross.LoadModel("assets/models/albatross/albatross.obj");
+        crossbow.LoadModel("assets/models/crossbow/crossbow.obj");
 
         for(int i = 0; i < 3; i++)
             rocks[i].LoadModel("assets/models/rocks/rock_" + std::to_string(i + 1) + ".obj");
@@ -146,7 +154,7 @@ namespace gps {
         setFloating(add(crate, glm::vec3(8.0f, 0.0f, 36.0f), 140.0f, 1.0f), 0.22f, 1.17f, 0.53f);
         setFloating(add(crate, glm::vec3(-38.0f, 0.0f, -4.0f), 200.0f, 1.0f), 0.22f, 1.17f, 0.53f);
 
-        albatrossPrevious = albatrossPathPoint(albatrossAngle, albatrossTime);
+        albatrossPrevious = albatrossPathPoint(LIGHTHOUSE_POSITION, ALBATROSS_RADIUS, ALBATROSS_HEIGHT);
         add(albatross, albatrossPrevious, 0.0f, 1.0f);
         albatrossIndex = (int)objects.size() - 1;
 
@@ -179,6 +187,7 @@ namespace gps {
         character.animator.attach(character.mesh);
         character.localPosition = localPosition;
         character.localYaw = localYaw;
+        character.targetYaw = localYaw;
         character.parentObject = parentObject;
         characters.push_back(character);
         return (int)characters.size() - 1;
@@ -191,11 +200,21 @@ namespace gps {
 
     void Scene::placeCrew()
     {
-        playAnimation(addCharacter("mariner", glm::vec3(0.0f, 6.5f, -7.6f), 0.0f, shipIndex), "helm", true, 0.0f);
-        playAnimation(addCharacter("sailor_1", glm::vec3(2.0f, 4.65f, 1.0f), 90.0f, shipIndex), "rail", true, 0.0f);
-        playAnimation(addCharacter("sailor_2", glm::vec3(-2.0f, 4.65f, -1.0f), -90.0f, shipIndex), "rail_call", true, 0.0f);
-        playAnimation(addCharacter("sailor_3", glm::vec3(0.8f, 6.3f, 6.0f), 0.0f, shipIndex), "fold_arms", true, 0.0f);
-        playAnimation(addCharacter("sailor_4", glm::vec3(-1.0f, 4.65f, 2.5f), 90.0f, shipIndex), "haul", true, 0.0f);
+        marinerCharacter = addCharacter("mariner", glm::vec3(0.0f, 6.5f, -7.6f), 0.0f, shipIndex);
+        playAnimation(marinerCharacter, "helm", true, 0.0f);
+        Character& mariner = characters[marinerCharacter];
+        mariner.prop = &crossbow;
+        mariner.propBone = mariner.mesh->findBone("hand_r");
+        mariner.propOffset = CROSSBOW_GRIP;
+
+        crewCharacters.push_back(addCharacter("sailor_1", glm::vec3(2.0f, 4.65f, 1.0f), 90.0f, shipIndex));
+        crewCharacters.push_back(addCharacter("sailor_2", glm::vec3(-2.0f, 4.65f, -1.0f), -90.0f, shipIndex));
+        crewCharacters.push_back(addCharacter("sailor_3", glm::vec3(0.8f, 6.3f, 6.0f), 0.0f, shipIndex));
+        crewCharacters.push_back(addCharacter("sailor_4", glm::vec3(-1.0f, 4.65f, 2.5f), 90.0f, shipIndex));
+
+        const char* work[] = {"rail", "rail_call", "fold_arms", "haul"};
+        for(size_t i = 0; i < crewCharacters.size(); i++)
+            playAnimation(crewCharacters[i], work[i], true, 0.0f);
     }
 
     glm::mat4 Scene::characterMatrix(Character& character)
@@ -406,11 +425,65 @@ namespace gps {
         }
     }
 
-    glm::vec3 Scene::albatrossPathPoint(float angle, float time)
+    glm::vec3 Scene::albatrossPathPoint(glm::vec3 center, float radius, float height)
     {
-        float radius = ALBATROSS_RADIUS + 5.0f * std::sin(time * 0.23f);
-        float height = ALBATROSS_HEIGHT + 3.5f * std::sin(time * 0.41f) + 1.2f * stormFactor * std::sin(time * 2.7f);
-        return glm::vec3(LIGHTHOUSE_POSITION.x + std::cos(angle) * radius, height, LIGHTHOUSE_POSITION.z + std::sin(angle) * radius);
+        float wander = radius + 5.0f * std::sin(albatrossTime * 0.23f);
+        float altitude = height + 3.5f * std::sin(albatrossTime * 0.41f) + 1.2f * stormFactor * std::sin(albatrossTime * 2.7f);
+        return glm::vec3(center.x + std::cos(albatrossAngle) * wander, altitude, center.z + std::sin(albatrossAngle) * wander);
+    }
+
+    void Scene::flyAlbatross(float deltaTime)
+    {
+        SceneObject& bird = objects[albatrossIndex];
+
+        glm::vec3 position = albatrossPathPoint(LIGHTHOUSE_POSITION, ALBATROSS_RADIUS, ALBATROSS_HEIGHT);
+        if(albatrossState == AlbatrossState::FollowingShip)
+        {
+            albatrossFollow = glm::min(1.0f, albatrossFollow + deltaTime / ALBATROSS_ARRIVAL_TIME);
+            glm::vec3 shipCircle = albatrossPathPoint(getShipPosition(), ALBATROSS_SHIP_RADIUS, ALBATROSS_SHIP_HEIGHT);
+            position = glm::mix(position, shipCircle, glm::smoothstep(0.0f, 1.0f, albatrossFollow));
+        }
+
+        albatrossVelocity = (position - albatrossPrevious) / deltaTime;
+        albatrossPrevious = position;
+
+        float horizontalSpeed = glm::length(glm::vec2(albatrossVelocity.x, albatrossVelocity.z));
+        float wobble = 10.0f * stormFactor * std::sin(albatrossTime * 3.1f);
+
+        bird.position = position;
+        bird.rotationDegrees.y = glm::degrees(std::atan2(-albatrossVelocity.x, -albatrossVelocity.z));
+        bird.rotationDegrees.x = glm::degrees(std::atan2(albatrossVelocity.y, horizontalSpeed));
+        bird.rotationDegrees.z = wobble - ALBATROSS_BANK;
+
+        float cycle = glm::mix(6.0f, 3.5f, stormFactor);
+        float phase = std::fmod(albatrossTime, cycle);
+        float envelope = glm::smoothstep(0.0f, 0.25f, phase) * (1.0f - glm::smoothstep(1.2f, 1.5f, phase));
+        float stroke = std::sin(2.0f * glm::pi<float>() * ALBATROSS_FLAP_SPEED * albatrossTime);
+        bird.wingFlap = glm::radians(5.0f + envelope * 32.0f * stroke);
+    }
+
+    void Scene::dropAlbatross(float deltaTime)
+    {
+        SceneObject& bird = objects[albatrossIndex];
+        float surface = water.heightAt(bird.position.x, bird.position.z) + 0.12f;
+
+        if(albatrossState == AlbatrossState::Falling)
+        {
+            albatrossVelocity.y -= 9.81f * deltaTime;
+            bird.position += albatrossVelocity * deltaTime;
+            bird.rotationDegrees.z += 260.0f * deltaTime;
+            bird.rotationDegrees.x -= 90.0f * deltaTime;
+            bird.wingFlap = glm::radians(-25.0f);
+            if(bird.position.y <= surface)
+                albatrossState = AlbatrossState::Floating;
+            return;
+        }
+
+        bird.position.y = surface;
+        bird.position += glm::vec3(wind.getVelocity().x, 0.0f, wind.getVelocity().z) * 0.03f * deltaTime;
+        bird.rotationDegrees.x = 0.0f;
+        bird.rotationDegrees.z = 0.0f;
+        bird.wingFlap = glm::radians(-4.0f);
     }
 
     void Scene::updateAlbatross(float deltaTime)
@@ -419,26 +492,114 @@ namespace gps {
             return;
 
         albatrossTime += deltaTime;
-        albatrossAngle += ALBATROSS_SPEED / ALBATROSS_RADIUS * deltaTime;
+        if(albatrossState == AlbatrossState::Falling || albatrossState == AlbatrossState::Floating)
+        {
+            dropAlbatross(deltaTime);
+            return;
+        }
 
-        SceneObject& bird = objects[albatrossIndex];
-        glm::vec3 position = albatrossPathPoint(albatrossAngle, albatrossTime);
-        glm::vec3 velocity = (position - albatrossPrevious) / deltaTime;
-        albatrossPrevious = position;
+        float radius = albatrossState == AlbatrossState::FollowingShip ? ALBATROSS_SHIP_RADIUS : ALBATROSS_RADIUS;
+        albatrossAngle += ALBATROSS_SPEED / radius * deltaTime;
+        flyAlbatross(deltaTime);
+    }
 
-        float horizontalSpeed = glm::length(glm::vec2(velocity.x, velocity.z));
-        float wobble = 10.0f * stormFactor * std::sin(albatrossTime * 3.1f);
+    void Scene::callAlbatross()
+    {
+        if(albatrossState == AlbatrossState::CirclingLighthouse)
+        {
+            albatrossState = AlbatrossState::FollowingShip;
+            albatrossFollow = 0.0f;
+        }
+    }
 
-        bird.position = position;
-        bird.rotationDegrees.y = glm::degrees(std::atan2(-velocity.x, -velocity.z));
-        bird.rotationDegrees.x = glm::degrees(std::atan2(velocity.y, horizontalSpeed));
-        bird.rotationDegrees.z = wobble - ALBATROSS_BANK;
+    bool Scene::isAlbatrossShot()
+    {
+        return albatrossState == AlbatrossState::Falling || albatrossState == AlbatrossState::Floating;
+    }
 
-        float cycle = glm::mix(6.0f, 3.5f, stormFactor);
-        float phase = std::fmod(albatrossTime, cycle);
-        float envelope = glm::smoothstep(0.0f, 0.25f, phase) * (1.0f - glm::smoothstep(1.2f, 1.5f, phase));
-        float stroke = std::sin(2.0f * glm::pi<float>() * ALBATROSS_FLAP_SPEED * albatrossTime);
-        bird.wingFlap = glm::radians(5.0f + envelope * 32.0f * stroke);
+    glm::vec3 Scene::toShipLocal(glm::vec3 worldPoint)
+    {
+        return glm::vec3(glm::inverse(objects[shipIndex].getModelMatrix()) * glm::vec4(worldPoint, 1.0f));
+    }
+
+    float Scene::yawTowards(Character& character, glm::vec3 localTarget)
+    {
+        glm::vec3 offset = localTarget - character.localPosition;
+        return glm::degrees(std::atan2(offset.x, offset.z));
+    }
+
+    void Scene::crewHailAlbatross()
+    {
+        const char* greetings[] = {"rail_call", "rail_call", "yes", "yes"};
+        for(size_t i = 0; i < crewCharacters.size(); i++)
+            playAnimation(crewCharacters[i], greetings[i % 4], true, 0.5f);
+    }
+
+    void Scene::crewMourn()
+    {
+        const char* reactions[] = {"shake_head", "grieve", "shake_head", "grieve"};
+        Character& mariner = characters[marinerCharacter];
+        for(size_t i = 0; i < crewCharacters.size(); i++)
+        {
+            Character& sailor = characters[crewCharacters[i]];
+            sailor.targetYaw = yawTowards(sailor, mariner.localPosition);
+            playAnimation(crewCharacters[i], reactions[i % 4], true, 0.6f);
+        }
+    }
+
+    void Scene::raiseCrossbow()
+    {
+        if(crossbowTimer >= 0.0f || isAlbatrossShot())
+            return;
+
+        Character& mariner = characters[marinerCharacter];
+        mariner.targetYaw = yawTowards(mariner, toShipLocal(objects[albatrossIndex].position));
+        mariner.propVisible = true;
+        playAnimation(marinerCharacter, "aim", true, 0.4f);
+        crossbowTimer = 0.0f;
+    }
+
+    void Scene::updateCrossbow(float deltaTime)
+    {
+        if(crossbowTimer < 0.0f)
+            return;
+
+        Character& mariner = characters[marinerCharacter];
+        float before = crossbowTimer;
+        crossbowTimer += deltaTime;
+
+        if(before < CROSSBOW_AIM_TIME)
+            mariner.targetYaw = yawTowards(mariner, toShipLocal(objects[albatrossIndex].position));
+
+        if(before < CROSSBOW_AIM_TIME && crossbowTimer >= CROSSBOW_AIM_TIME)
+        {
+            playAnimation(marinerCharacter, "shoot", false, 0.1f);
+            albatrossState = AlbatrossState::Falling;
+            albatrossVelocity *= 0.35f;
+        }
+
+        if(crossbowTimer >= CROSSBOW_LOWER_TIME)
+        {
+            mariner.propVisible = false;
+            mariner.targetYaw = 0.0f;
+            playAnimation(marinerCharacter, "helm", true, 0.8f);
+            crossbowTimer = -1.0f;
+        }
+    }
+
+    void Scene::turnCharacters(float deltaTime)
+    {
+        for(Character& character : characters)
+        {
+            float difference = std::remainder(character.targetYaw - character.localYaw, 360.0f);
+            float step = CHARACTER_TURN_SPEED * deltaTime;
+            character.localYaw += glm::clamp(difference, -step, step);
+        }
+    }
+
+    void Scene::setSailingWind(float strength)
+    {
+        sailingWind = strength;
     }
 
     void Scene::setShipControls(float sail, float helm)
@@ -449,7 +610,7 @@ namespace gps {
 
     void Scene::updateShip(float deltaTime)
     {
-        float windStrength = glm::mix(0.7f, 1.0f, stormFactor);
+        float windStrength = glm::mix(0.7f, 1.0f, stormFactor) * sailingWind;
         shipController.update(deltaTime, shipSailInput, shipHelmInput, windStrength, obstacles);
 
         SceneObject& playerShip = objects[shipIndex];
@@ -489,6 +650,8 @@ namespace gps {
         updateShip(deltaTime);
         updateFloating();
         updateAlbatross(deltaTime);
+        updateCrossbow(deltaTime);
+        turnCharacters(deltaTime);
         for(Character& character : characters)
             character.animator.update(deltaTime);
         wind.update(deltaTime, stormFactor);
@@ -629,6 +792,20 @@ namespace gps {
             glUniform1f(emissiveLoc, object.emissiveStrength);
             glUniform1f(wingFlapLoc, object.wingFlap);
             object.model->Draw(shader);
+        }
+
+        glUniform1f(wingFlapLoc, 0.0f);
+        glUniform1f(emissiveLoc, 0.0f);
+        for(Character& character : characters)
+        {
+            if(!character.visible || !character.propVisible || character.prop == nullptr)
+                continue;
+
+            glm::mat4 model = characterMatrix(character) * character.animator.getBoneTransform(character.propBone) * character.propOffset;
+            glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(model));
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+            character.prop->Draw(shader);
         }
     }
 }
