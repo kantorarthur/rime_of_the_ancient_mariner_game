@@ -18,7 +18,7 @@ namespace gps {
     class Fog
     {
     public:
-        void update(float deltaTime, float stormFactor);
+        void update(float deltaTime, float stormFactor, float flash);
         void toggle();
         bool isEnabled();
         void upload(gps::Shader shader);

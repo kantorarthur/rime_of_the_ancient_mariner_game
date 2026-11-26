@@ -16,6 +16,6 @@ const float SKY_DISTANCE = 1500.0;
 void main()
 {
     vec3 direction = normalize(fDirection);
-    vec3 color = texture(skybox, direction).rgb * brightness;
+    vec3 color = texture(skybox, direction).rgb * brightness * (1.0 + 3.0 * flash);
     fColor = vec4(applyFogAlongRay(color, cameraPosition, direction, SKY_DISTANCE), 1.0);
 }

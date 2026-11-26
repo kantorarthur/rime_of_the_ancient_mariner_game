@@ -68,7 +68,7 @@ void main()
 
     vec3 reflected = reflect(-viewDirection, normal);
     reflected.y = max(reflected.y, 0.02);
-    vec3 reflection = texture(skybox, reflected).rgb * mix(0.85, 0.5, stormFactor);
+    vec3 reflection = texture(skybox, reflected).rgb * mix(0.85, 0.5, stormFactor) * (1.0 + 2.5 * flash);
 
     vec3 toMoon = normalize(moon.direction);
     vec3 up = vec3(0.0, 1.0, 0.0);

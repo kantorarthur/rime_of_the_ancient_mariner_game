@@ -7,14 +7,15 @@ namespace gps {
     const FogSettings CALM_FOG = {glm::vec3(0.024f, 0.032f, 0.046f), 0.010f, 0.045f, 3.0f};
     const FogSettings STORM_FOG = {glm::vec3(0.0045f, 0.0055f, 0.0075f), 0.018f, 0.035f, 3.0f};
     const float FOG_FADE_SPEED = 0.6f;
+    const glm::vec3 LIGHTNING_FOG_COLOR = glm::vec3(0.10f, 0.11f, 0.14f);
 
-    void Fog::update(float deltaTime, float stormFactor)
+    void Fog::update(float deltaTime, float stormFactor, float flash)
     {
         float target = enabled ? 1.0f : 0.0f;
         float step = FOG_FADE_SPEED * deltaTime;
         amount += glm::clamp(target - amount, -step, step);
 
-        current.color = glm::mix(CALM_FOG.color, STORM_FOG.color, stormFactor);
+        current.color = glm::mix(CALM_FOG.color, STORM_FOG.color, stormFactor) + LIGHTNING_FOG_COLOR * flash;
         current.density = glm::mix(CALM_FOG.density, STORM_FOG.density, stormFactor) * amount;
         current.heightFalloff = glm::mix(CALM_FOG.heightFalloff, STORM_FOG.heightFalloff, stormFactor);
         current.glowStrength = glm::mix(CALM_FOG.glowStrength, STORM_FOG.glowStrength, stormFactor);

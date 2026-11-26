@@ -53,6 +53,8 @@ gps::Shader skyboxShader;
 gps::Shader waterShader;
 gps::Shader beamShader;
 gps::Shader depthShader;
+gps::Shader rainShader;
+gps::Shader boltShader;
 
 GLenum glCheckError_(const char* file, int line)
 {
@@ -153,6 +155,9 @@ void handleKeyPresses()
         viewChanged = true;
     }
 
+    if(input.wasKeyPressed(GLFW_KEY_L))
+        scene.triggerLightning(myCamera.getPosition(), myCamera.getFrontDirection());
+
     if(input.wasKeyPressed(GLFW_KEY_F))
     {
         scene.toggleFog();
@@ -222,6 +227,8 @@ void initShaders()
     waterShader.loadShader("assets/shaders/water.vert", "assets/shaders/water.frag");
     beamShader.loadShader("assets/shaders/beam.vert", "assets/shaders/beam.frag");
     depthShader.loadShader("assets/shaders/shadow.vert", "assets/shaders/shadow.frag");
+    rainShader.loadShader("assets/shaders/rain.vert", "assets/shaders/rain.frag");
+    boltShader.loadShader("assets/shaders/bolt.vert", "assets/shaders/bolt.frag");
 }
 
 void initUniforms()
@@ -263,6 +270,7 @@ void renderScene()
     scene.uploadEnvironment(skyboxShader, cameraPosition);
     skybox.draw(skyboxShader, view, projection, 1.0f);
     scene.drawBeam(beamShader, view, projection, cameraPosition);
+    scene.drawWeather(rainShader, boltShader, view, projection, cameraPosition);
 }
 
 void cleanup()
@@ -304,7 +312,7 @@ int main()
         handleResize();
         handleKeyPresses();
         processCamera();
-        scene.update(deltaTime);
+        scene.update(deltaTime, myCamera.getPosition(), myCamera.getFrontDirection());
 
         renderScene();
         glfwSwapBuffers(myWindow.getWindow());

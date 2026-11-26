@@ -32,6 +32,7 @@ uniform DirectionalLight moon;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform int pointLightCount;
 uniform SpotLight beam;
+uniform float flash;
 
 float attenuation(float distance, float constant, float linear, float quadratic)
 {

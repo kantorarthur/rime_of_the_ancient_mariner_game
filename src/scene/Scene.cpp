@@ -32,6 +32,10 @@ namespace gps {
     const GLuint MOON_SHADOW_UNIT = 5;
     const GLuint BEAM_SHADOW_UNIT = 6;
 
+    const int RAIN_DROP_COUNT = 12000;
+    const glm::vec3 LIGHTNING_COLOR = glm::vec3(1.4f, 1.5f, 1.8f);
+    const glm::vec3 LIGHTNING_AMBIENT = glm::vec3(0.10f, 0.11f, 0.14f);
+
     const glm::vec3 CALM_MOON_DIRECTION = glm::vec3(0.378f, 0.378f, -0.845f);
     const glm::vec3 STORM_MOON_DIRECTION = glm::vec3(0.399f, 0.227f, -0.888f);
 
@@ -58,7 +62,9 @@ namespace gps {
             stormFactor = 0.0f;
         water.update(0.0f, stormFactor);
         updateFloating();
-        fog.update(0.0f, stormFactor);
+        fog.update(0.0f, stormFactor, 0.0f);
+        rain.init(RAIN_DROP_COUNT);
+        lightning.init();
         lightBeam.init(BEAM_SHAFT_LENGTH, BEAM_SHAFT_RADIUS, BEAM_SHAFT_SPREAD, 48);
         moonShadowMap.init(MOON_SHADOW_SIZE);
         beamShadowMap.init(BEAM_SHADOW_SIZE);
@@ -154,16 +160,17 @@ namespace gps {
     {
         if(weather == Weather::Calm)
         {
-            moon.direction = CALM_MOON_DIRECTION;
-            moon.color = glm::vec3(0.30f, 0.36f, 0.50f);
-            moon.ambient = glm::vec3(0.035f, 0.045f, 0.065f);
+            moonBase.direction = CALM_MOON_DIRECTION;
+            moonBase.color = glm::vec3(0.30f, 0.36f, 0.50f);
+            moonBase.ambient = glm::vec3(0.035f, 0.045f, 0.065f);
         }
         else
         {
-            moon.direction = STORM_MOON_DIRECTION;
-            moon.color = glm::vec3(0.10f, 0.12f, 0.16f);
-            moon.ambient = glm::vec3(0.018f, 0.022f, 0.03f);
+            moonBase.direction = STORM_MOON_DIRECTION;
+            moonBase.color = glm::vec3(0.10f, 0.12f, 0.16f);
+            moonBase.ambient = glm::vec3(0.018f, 0.022f, 0.03f);
         }
+        moon = moonBase;
     }
 
     void Scene::toggleWeather()
@@ -178,6 +185,23 @@ namespace gps {
     Weather Scene::getWeather()
     {
         return weather;
+    }
+
+    void Scene::applyLightning()
+    {
+        float flash = lightning.getFlash();
+        float weight = glm::smoothstep(0.0f, 0.15f, flash);
+
+        moon = moonBase;
+        moon.direction = glm::normalize(glm::mix(glm::normalize(moonBase.direction), lightning.getDirection(), weight));
+        moon.color += LIGHTNING_COLOR * flash;
+        moon.ambient += LIGHTNING_AMBIENT * flash;
+    }
+
+    void Scene::triggerLightning(glm::vec3 cameraPosition, glm::vec3 viewDirection)
+    {
+        if(stormFactor > 0.5f)
+            lightning.strike(cameraPosition, viewDirection);
     }
 
     void Scene::toggleFog()
@@ -233,14 +257,18 @@ namespace gps {
         }
     }
 
-    void Scene::update(float deltaTime)
+    void Scene::update(float deltaTime, glm::vec3 cameraPosition, glm::vec3 viewDirection)
     {
         float target = weather == Weather::Storm ? 1.0f : 0.0f;
         float step = 0.35f * deltaTime;
         stormFactor += glm::clamp(target - stormFactor, -step, step);
         water.update(deltaTime, stormFactor);
         updateFloating();
-        fog.update(deltaTime, stormFactor);
+        wind.update(deltaTime, stormFactor);
+        rain.update(deltaTime, wind.getVelocity(), glm::smoothstep(0.3f, 1.0f, stormFactor));
+        lightning.update(deltaTime, stormFactor, cameraPosition, viewDirection);
+        applyLightning();
+        fog.update(deltaTime, stormFactor, lightning.getFlash());
 
         beamAngle += BEAM_SPEED_DEGREES * deltaTime;
         if(beamAngle >= 360.0f)
@@ -296,6 +324,7 @@ namespace gps {
         uploadSpotLight(program, "beam", beam);
         fog.upload(shader);
         glUniform3fv(glGetUniformLocation(program, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+        glUniform1f(glGetUniformLocation(program, "flash"), lightning.getFlash());
 
         glUniformMatrix4fv(glGetUniformLocation(program, "moonLightSpace"), 1, GL_FALSE, glm::value_ptr(moonLightSpace));
         glUniformMatrix4fv(glGetUniformLocation(program, "beamLightSpace"), 1, GL_FALSE, glm::value_ptr(beamLightSpace));
@@ -314,6 +343,14 @@ namespace gps {
     {
         uploadEnvironment(shader, cameraPosition);
         lightBeam.draw(shader, view, projection, beam.position, beam.direction);
+    }
+
+    void Scene::drawWeather(gps::Shader rainShader, gps::Shader boltShader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition)
+    {
+        uploadEnvironment(boltShader, cameraPosition);
+        lightning.draw(boltShader, view, projection, cameraPosition);
+        uploadEnvironment(rainShader, cameraPosition);
+        rain.draw(rainShader, view, projection);
     }
 
     SceneObject& Scene::add(gps::Model3D& model, glm::vec3 position, float rotationY, float scale)

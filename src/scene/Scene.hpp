@@ -7,7 +7,10 @@
 #include "graphics/ShadowMap.hpp"
 #include "scene/Fog.hpp"
 #include "scene/LightBeam.hpp"
+#include "scene/Lightning.hpp"
+#include "scene/Rain.hpp"
 #include "scene/Water.hpp"
+#include "scene/Wind.hpp"
 
 #include <glm/glm.hpp>
 
@@ -39,17 +42,19 @@ namespace gps {
         Scene& operator=(const Scene&) = delete;
 
         void load();
-        void update(float deltaTime);
+        void update(float deltaTime, glm::vec3 cameraPosition, glm::vec3 viewDirection);
         void draw(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc, GLint emissiveLoc);
         void renderShadows(gps::Shader depthShader);
         void uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition);
         void drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture);
         void drawBeam(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
+        void drawWeather(gps::Shader rainShader, gps::Shader boltShader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
 
         void toggleWeather();
         Weather getWeather();
         void toggleFog();
         bool isFogEnabled();
+        void triggerLightning(glm::vec3 cameraPosition, glm::vec3 viewDirection);
 
     private:
         gps::Model3D island;
@@ -67,10 +72,14 @@ namespace gps {
         std::vector<PointLight> pointLights;
         SpotLight beam;
         DirectionalLight moon;
+        DirectionalLight moonBase;
 
         gps::Water water;
         gps::Fog fog;
         gps::LightBeam lightBeam;
+        gps::Wind wind;
+        gps::Rain rain;
+        gps::Lightning lightning;
         gps::ShadowMap moonShadowMap;
         gps::ShadowMap beamShadowMap;
         glm::mat4 moonLightSpace = glm::mat4(1.0f);
@@ -84,6 +93,7 @@ namespace gps {
         void placeObjects();
         void placeLights();
         void applyWeather();
+        void applyLightning();
         void placeFoam();
         void updateFloating();
         void updateLightSpaces();
