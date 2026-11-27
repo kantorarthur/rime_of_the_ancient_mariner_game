@@ -19,6 +19,22 @@ https://github.com/user-attachments/assets/0729952c-22c7-40e6-9cc8-5d69ec31db99
 
 I really loved Iron Maiden's song "Rime of the Ancient Mariner" (*Powerslave*, 1984). After listening to it, I read Samuel Taylor Coleridge's poem that the song is based on, and then I decided to turn the story into a game for my university graphics project.
 
+## Pictures from the game
+
+<br>
+
+<img src="pictures_videos/scenes_from_game/01_storm_ship_and_lighthouse.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/02_island_from_above.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/03_lightning_over_the_island.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/04_lighthouse_beam.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/05_becalmed_death_fires.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/06_ghost_ship_approaching.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/07_ghost_ship_alongside.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/08_life_in_death.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/09_water_snakes.jpg" width="800">
+<img src="pictures_videos/scenes_from_game/10_the_wedding.jpg" width="800">
+
+
 ## Built with
 
 - **C++17** and **OpenGL 4.1 core**, with shaders written in **GLSL**
@@ -42,7 +58,7 @@ It needs a graphics card with OpenGL 4.1. Press Esc in the game for the menu and
 ## Evolution of the game
 
 <details>
-<summary>Evolution of the game (click to open)</summary>
+<summary>Evolution of the game (click to open)</summary
 
 <br>
 
