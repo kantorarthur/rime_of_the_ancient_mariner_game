@@ -44,6 +44,15 @@ namespace gps {
 
         if(story.getChapter() == Chapter::GhostApproach && scene.isGhostShipAlongside())
             story.ghostArrived();
+        if(story.getChapter() == Chapter::Blessing && input.wasKeyPressed(GLFW_KEY_B))
+        {
+            scene.marinerBlesses();
+            story.blessed();
+        }
+        if(story.getChapter() == Chapter::Rescue && scene.isBoatAtMariner())
+            story.boatArrived();
+        if(story.getChapter() == Chapter::Returning && scene.isBoatHome())
+            story.landed();
 
         if(story.getChapter() == Chapter::Crossbow && input.wasKeyPressed(GLFW_KEY_X) && scene.raiseCrossbow())
             filmShooting(scene);
@@ -164,6 +173,86 @@ namespace gps {
             shots.push_back({ShotFocus::Mariner, 0, 4.0f});
             cinematic.play(shots);
         }
+        else if(event == "snakes")
+        {
+            scene.showWaterSnakes(true);
+            cinematic.play({{ShotFocus::Snakes, 0, 5.5f}, {ShotFocus::Snakes, 5, 5.5f}});
+        }
+        else if(event == "blessed")
+        {
+            scene.liftCurse();
+            cinematic.play({{ShotFocus::Mariner, 0, 5.0f}, {ShotFocus::Snakes, 2, 3.0f}});
+        }
+        else if(event == "albatrossfalls")
+        {
+            scene.dropHungAlbatross();
+            cinematic.play({{ShotFocus::Overboard, 0, 6.0f}});
+        }
+        else if(event == "rain")
+        {
+            scene.showWaterSnakes(false);
+            scene.setWeather(Weather::Storm);
+            cinematic.play({{ShotFocus::ShipWide, 0, 8.0f}});
+        }
+        else if(event == "lightning")
+            scene.triggerLightning(scene.shipPoint(glm::vec3(0.0f, 10.0f, 0.0f)), scene.shipPoint(glm::vec3(0.0f, 0.0f, 1.0f)) - scene.shipPoint(glm::vec3(0.0f)));
+        else if(event == "rise")
+        {
+            scene.crewRise();
+            std::vector<Shot> shots;
+            for(int i = 0; i < (int)scene.getCrewCharacters().size(); i++)
+                shots.push_back({ShotFocus::CrewFall, i, 2.4f});
+            cinematic.play(shots);
+        }
+        else if(event == "spiritwind")
+        {
+            scene.setWeather(Weather::Calm);
+            scene.setSailingWind(1.0f);
+        }
+        else if(event == "home")
+        {
+            scene.launchBoat();
+            cinematic.play({{ShotFocus::Lighthouse, 0, 5.0f}, {ShotFocus::Boat, 0, 4.0f}});
+        }
+        else if(event == "seraphs")
+        {
+            scene.setSailingWind(0.0f);
+            scene.crewFallAgain();
+            std::vector<Shot> shots;
+            for(int i = 0; i < 2; i++)
+                shots.push_back({ShotFocus::CrewFall, i, 3.5f});
+            cinematic.play(shots);
+        }
+        else if(event == "sink")
+        {
+            scene.sinkShip();
+            cinematic.play({{ShotFocus::Sinking, 0, 10.0f}});
+        }
+        else if(event == "afloat")
+        {
+            scene.marinerAfloat();
+            cinematic.play({{ShotFocus::Swimmer, scene.getMarinerCharacter(), 6.0f}, {ShotFocus::Boat, 0, 120.0f}});
+        }
+        else if(event == "aboard")
+        {
+            scene.marinerAboard();
+            cinematic.play({{ShotFocus::Boat, 0, 120.0f}});
+        }
+        else if(event == "pilotfit")
+        {
+            scene.pilotFit();
+            cinematic.play({{ShotFocus::BoatPerson, scene.getPilotCharacter(), 5.0f}, {ShotFocus::BoatPerson, scene.getHermitCharacter(), 5.0f}, {ShotFocus::Boat, 0, 120.0f}});
+        }
+        else if(event == "boylaughs")
+        {
+            scene.boyLaughs();
+            cinematic.play({{ShotFocus::BoatPerson, scene.getPilotBoyCharacter(), 5.0f}, {ShotFocus::Boat, 0, 300.0f}});
+        }
+        else if(event == "ashore")
+        {
+            scene.marinerAshore();
+            cinematic.play({{ShotFocus::Person, scene.getMarinerCharacter(), 8.0f}, {ShotFocus::Lighthouse, 0, 1000.0f}});
+        }
         else if(event == "alone")
         {
             scene.marinerDespairs();
@@ -267,14 +356,16 @@ namespace gps {
             return;
         }
 
-        if(mode == ControlMode::Ship && story.getChapter() != Chapter::Prologue)
+        if(mode == ControlMode::Ship && story.getChapter() != Chapter::Prologue && !scene.isShipSinking())
             drawShipStatus(text, scene, width, height);
 
+        float promptScale = height / 300.0f;
         if(story.getChapter() == Chapter::Crossbow)
-        {
-            float promptScale = height / 300.0f;
             text.drawTextCentered("X   take up the cross-bow", width * 0.5f, height * 0.82f, promptScale, PROMPT_COLOR);
-        }
+        if(story.getChapter() == Chapter::Blessing)
+            text.drawTextCentered("B   bless them unaware", width * 0.5f, height * 0.82f, promptScale, PROMPT_COLOR);
+        if(story.getChapter() == Chapter::Homeward)
+            text.drawTextCentered("sail home to the lighthouse", width * 0.5f, height * 0.82f, promptScale, PROMPT_COLOR);
 
         float scale = height / 600.0f;
         std::string hint;
@@ -292,7 +383,17 @@ namespace gps {
         float scale = height / 500.0f;
         char status[96];
         std::snprintf(status, sizeof(status), "sails %3d%%     speed %4.1f knots", (int)(scene.getShipSail() * 100.0f + 0.5f), scene.getShipSpeed() * 1.944f);
-        text.drawText(status, text.lineHeight(scale), height - text.lineHeight(scale) * 3.2f, scale, HINT_COLOR);
+        std::string line = status;
+        if(scene.getSailingWind() <= 0.0f)
+            line += "     no wind - the ship is becalmed";
+        if(story.getChapter() == Chapter::Homeward)
+        {
+            glm::vec3 ship = scene.getShipPosition();
+            char home[48];
+            std::snprintf(home, sizeof(home), "     lighthouse %d m", (int)glm::length(glm::vec2(ship.x, ship.z)));
+            line += home;
+        }
+        text.drawText(line, text.lineHeight(scale), height - text.lineHeight(scale) * 3.2f, scale, HINT_COLOR);
     }
 
     std::string Game::describeMode()

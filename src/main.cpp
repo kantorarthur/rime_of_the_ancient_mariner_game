@@ -58,6 +58,7 @@ gps::Shader skinnedShader;
 gps::Shader skinnedDepthShader;
 gps::Shader ghostShader;
 gps::Shader soulShader;
+gps::Shader snakeShader;
 
 gps::Game game;
 gps::TextRenderer textRenderer;
@@ -212,6 +213,7 @@ void initShaders()
     skinnedDepthShader.loadShader("assets/shaders/skinned_shadow.vert", "assets/shaders/shadow.frag");
     ghostShader.loadShader("assets/shaders/basic.vert", "assets/shaders/ghost.frag");
     soulShader.loadShader("assets/shaders/soul.vert", "assets/shaders/soul.frag");
+    snakeShader.loadShader("assets/shaders/snake.vert", "assets/shaders/snake.frag");
 }
 
 void initUniforms()
@@ -261,6 +263,7 @@ void renderScene()
     skybox.draw(skyboxShader, view, projection, 1.0f);
     scene.drawGhosts(ghostShader, view, projection, cameraPosition);
     scene.drawBeam(beamShader, view, projection, cameraPosition);
+    scene.drawSnakes(snakeShader, view, projection, cameraPosition);
     scene.drawSouls(soulShader, view, projection, cameraPosition);
     scene.drawWeather(rainShader, boltShader, view, projection, cameraPosition);
 

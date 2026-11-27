@@ -12,6 +12,7 @@
 #include "scene/Lightning.hpp"
 #include "scene/Rain.hpp"
 #include "scene/Water.hpp"
+#include "scene/WaterSnakes.hpp"
 #include "scene/Wind.hpp"
 
 #include <glm/glm.hpp>
@@ -24,7 +25,8 @@
 namespace gps {
 
     enum class Weather {Calm, Storm};
-    enum class AlbatrossState {CirclingLighthouse, FollowingShip, Falling, Floating, Hung};
+    enum class AlbatrossState {CirclingLighthouse, FollowingShip, Falling, Floating, Hung, Sinking, Gone};
+    enum class BoatState {Moored, Rowing, Waiting, Returning};
     enum class GhostState {Hidden, Approaching, Alongside, Leaving};
 
     struct Soul
@@ -69,6 +71,7 @@ namespace gps {
         void drawBeam(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
         void drawGhosts(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
         void drawSouls(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
+        void drawSnakes(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
         void drawWeather(gps::Shader rainShader, gps::Shader boltShader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
 
         void toggleWeather();
@@ -100,6 +103,30 @@ namespace gps {
         int getLifeInDeathCharacter();
         glm::vec3 getGhostShipPoint(glm::vec3 localPoint);
         glm::vec3 getDicePosition();
+
+        void showWaterSnakes(bool visible);
+        void marinerBlesses();
+        void liftCurse();
+        void dropHungAlbatross();
+        void crewRise();
+        void crewFallAgain();
+        void sinkShip();
+        void marinerAfloat();
+        void launchBoat();
+        void marinerAshore();
+        bool isBoatHome();
+        bool isShipSinking();
+        bool isBoatAtMariner();
+        void marinerAboard();
+        void pilotFit();
+        void boyLaughs();
+        float getSailingWind();
+        int getPilotCharacter();
+        int getPilotBoyCharacter();
+        int getHermitCharacter();
+        glm::vec3 getSnakeHead(int snake);
+        glm::vec3 getBoatPoint(glm::vec3 localPoint);
+        glm::vec3 getLighthouseTop();
 
         glm::vec3 characterPoint(int character, glm::vec3 localOffset);
         glm::vec3 characterHead(int character);
@@ -181,6 +208,24 @@ namespace gps {
         int diceIndex[2] = {-1, -1};
         float diceTime = -1.0f;
 
+        gps::WaterSnakes waterSnakes;
+        std::vector<float> crewWorkYaw;
+        int boatIndex = -1;
+        BoatState boatState = BoatState::Moored;
+        bool boatReturned = false;
+        glm::vec3 boatHome = glm::vec3(0.0f);
+        glm::vec3 boatTarget = glm::vec3(0.0f);
+        int pilotCharacter = -1;
+        int pilotBoyCharacter = -1;
+        int hermitCharacter = -1;
+        bool shipSinking = false;
+        float sinkTime = 0.0f;
+        glm::vec3 sinkStartPosition = glm::vec3(0.0f);
+        glm::vec3 sinkStartRotation = glm::vec3(0.0f);
+        bool marinerSwimming = false;
+        float seraphFade = 0.0f;
+        float seraphTarget = 0.0f;
+
         float curse = 0.0f;
         float curseTarget = 0.0f;
 
@@ -222,6 +267,9 @@ namespace gps {
         void updateCrossbow(float deltaTime);
         void turnCharacters(float deltaTime);
         void placeGhostShip();
+        void updateSinking(float deltaTime);
+        void updateBoat(float deltaTime);
+        void updateSwimming();
         void updateGhostShip(float deltaTime);
         void updateDice(float deltaTime);
         void updateCrewDeaths(float deltaTime);

@@ -64,10 +64,16 @@ namespace gps {
     const float DICE_FLIGHT_TIME = 0.8f;
     const float SOUL_DELAY = 1.3f;
     const float SOUL_LIFETIME = 6.0f;
+    const int WATER_SNAKE_COUNT = 12;
+    const float SINK_TIME = 9.0f;
+    const glm::vec3 SUNK_OFFSET = glm::vec3(-14.0f, -34.0f, 24.0f);
+    const float SWIM_DEPTH = -0.15f;
+    const float BOAT_SPEED = 3.2f;
+    const float BOAT_FLOOR = 0.12f;
     const glm::mat4 CROSSBOW_GRIP = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.06f));
 
     const std::string CHARACTER_FOLDER = "assets/characters/";
-    const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4", "death", "life_in_death"};
+    const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4", "death", "life_in_death", "pilot", "pilot_boy", "hermit"};
     const char* ANIMATION_CLIPS[] = {"idle", "talk", "helm", "death", "sit", "sit_talk", "aim", "shoot", "bless", "bless_hold", "grieve", "kneel", "dance", "walk", "walk_formal", "swim", "hit", "interact", "haul", "rail", "rail_call", "shake_head", "fold_arms", "lantern", "rise", "zombie", "zombie_walk", "yes", "throw", "consume"};
 
     const int RAIN_DROP_COUNT = 12000;
@@ -114,6 +120,7 @@ namespace gps {
         rain.init(RAIN_DROP_COUNT);
         lightning.init();
         lightBeam.init(BEAM_SHAFT_LENGTH, BEAM_SHAFT_RADIUS, BEAM_SHAFT_SPREAD, 48);
+        waterSnakes.init(WATER_SNAKE_COUNT);
 
         glGenVertexArrays(1, &soulVao);
         glGenBuffers(1, &soulVbo);
@@ -166,6 +173,8 @@ namespace gps {
 
         glm::vec3 boatPosition = onCircle(PIER_ANGLE, 28.0f, -0.3f) - pierSide * 3.0f;
         setFloating(add(boat, boatPosition, PIER_ANGLE + 180.0f, 1.0f), 0.3f, 4.4f, 1.8f);
+        boatIndex = (int)objects.size() - 1;
+        boatHome = boatPosition;
 
         SceneObject& wreck = add(ship, glm::vec3(-46.0f, -5.5f, 18.0f), 65.0f, 1.0f);
         wreck.rotationDegrees.x = -7.0f;
@@ -253,7 +262,20 @@ namespace gps {
 
         const char* work[] = {"rail", "rail_call", "fold_arms", "haul"};
         for(size_t i = 0; i < crewCharacters.size(); i++)
+        {
             playAnimation(crewCharacters[i], work[i], true, 0.0f);
+            crewWorkYaw.push_back(characters[crewCharacters[i]].localYaw);
+        }
+
+        pilotCharacter = addCharacter("pilot", glm::vec3(0.0f, BOAT_FLOOR, 0.3f), 0.0f, boatIndex);
+        pilotBoyCharacter = addCharacter("pilot_boy", glm::vec3(0.0f, BOAT_FLOOR, 1.4f), 180.0f, boatIndex);
+        hermitCharacter = addCharacter("hermit", glm::vec3(0.0f, BOAT_FLOOR, -1.0f), 0.0f, boatIndex);
+        characters[pilotBoyCharacter].scale = 0.85f;
+        for(int person : {pilotCharacter, pilotBoyCharacter, hermitCharacter})
+        {
+            playAnimation(person, "sit", true, 0.0f);
+            characters[person].visible = false;
+        }
 
         deathCharacter = addCharacter("death", glm::vec3(-0.95f, GHOST_DECK, 0.0f), 90.0f, ghostIndex);
         playAnimation(deathCharacter, "sit", true, 0.0f);
@@ -636,6 +658,15 @@ namespace gps {
             float alpha = glm::smoothstep(0.0f, 0.5f, soul.age) * (1.0f - glm::smoothstep(SOUL_LIFETIME - 1.5f, SOUL_LIFETIME, soul.age));
             points.push_back(glm::vec4(soul.position, alpha));
         }
+        if(seraphFade > 0.0f)
+        {
+            for(int sailor : crewCharacters)
+            {
+                glm::vec3 above = characterPoint(sailor, glm::vec3(0.0f, 1.6f, 0.0f));
+                above.y += 0.15f * std::sin(albatrossTime * 2.0f + sailor);
+                points.push_back(glm::vec4(above, seraphFade * 0.8f));
+            }
+        }
         if(points.empty())
             return;
 
@@ -658,6 +689,258 @@ namespace gps {
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
         glDisable(GL_PROGRAM_POINT_SIZE);
+    }
+
+    void Scene::drawSnakes(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition)
+    {
+        uploadEnvironment(shader, cameraPosition);
+        waterSnakes.draw(shader, view, projection, cameraPosition);
+    }
+
+    void Scene::showWaterSnakes(bool visible)
+    {
+        waterSnakes.show(visible);
+    }
+
+    void Scene::marinerBlesses()
+    {
+        playAnimation(marinerCharacter, "bless", false, 0.3f);
+        characters[marinerCharacter].nextClip = "bless_hold";
+    }
+
+    void Scene::liftCurse()
+    {
+        curseTarget = 0.0f;
+    }
+
+    void Scene::dropHungAlbatross()
+    {
+        Character& mariner = characters[marinerCharacter];
+        Prop& deadBird = mariner.props[1];
+        glm::mat4 hung = characterMatrix(mariner) * mariner.animator.getBoneTransform(deadBird.bone) * deadBird.offset;
+        deadBird.visible = false;
+
+        SceneObject& bird = objects[albatrossIndex];
+        bird.position = glm::vec3(hung[3]);
+        bird.rotationDegrees = glm::vec3(-80.0f, objects[shipIndex].rotationDegrees.y, 0.0f);
+        bird.scale = 0.5f;
+        bird.wingFlap = glm::radians(-40.0f);
+        bird.visible = true;
+        glm::vec3 overboard = shipPoint(glm::vec3(-1.0f, 0.0f, 0.0f)) - shipPoint(glm::vec3(0.0f));
+        albatrossVelocity = glm::normalize(glm::vec3(overboard.x, 0.0f, overboard.z)) * 4.5f + glm::vec3(0.0f, 2.5f, 0.0f);
+        albatrossState = AlbatrossState::Sinking;
+        playAnimation(marinerCharacter, "kneel", true, 0.6f);
+        mariner.nextClip.clear();
+    }
+
+    void Scene::crewRise()
+    {
+        const char* work[] = {"haul", "zombie", "haul", "zombie"};
+        for(size_t i = 0; i < crewCharacters.size(); i++)
+        {
+            Character& sailor = characters[crewCharacters[i]];
+            sailor.targetYaw = crewWorkYaw[i];
+            playAnimation(crewCharacters[i], "rise", false, 0.3f);
+            sailor.nextClip = work[i % 4];
+        }
+        playAnimation(marinerCharacter, "helm", true, 0.8f);
+    }
+
+    void Scene::crewFallAgain()
+    {
+        for(int sailor : crewCharacters)
+        {
+            characters[sailor].nextClip.clear();
+            playAnimation(sailor, "death", false, 0.3f);
+        }
+        seraphTarget = 1.0f;
+    }
+
+    float Scene::getSailingWind()
+    {
+        return sailingWind;
+    }
+
+    void Scene::sinkShip()
+    {
+        if(shipSinking)
+            return;
+
+        SceneObject& playerShip = objects[shipIndex];
+        shipSinking = true;
+        sinkTime = 0.0f;
+        sinkStartPosition = playerShip.position;
+        sinkStartRotation = playerShip.rotationDegrees;
+        playerShip.floatLength = 0.0f;
+        pointLights[shipLanternLight].color = glm::vec3(0.0f);
+        water.addFoamCircle(glm::vec2(playerShip.position.x, playerShip.position.z), 9.0f, 4.0f);
+        seraphTarget = 0.0f;
+    }
+
+    void Scene::updateSinking(float deltaTime)
+    {
+        if(!shipSinking || sinkTime >= SINK_TIME)
+            return;
+
+        sinkTime += deltaTime;
+        float progress = glm::clamp(sinkTime / SINK_TIME, 0.0f, 1.0f);
+        float eased = std::pow(progress, 1.2f);
+
+        SceneObject& playerShip = objects[shipIndex];
+        playerShip.position = sinkStartPosition + glm::vec3(0.0f, SUNK_OFFSET.y * eased, 0.0f);
+        playerShip.rotationDegrees.x = glm::mix(sinkStartRotation.x, SUNK_OFFSET.x, eased);
+        playerShip.rotationDegrees.z = glm::mix(sinkStartRotation.z, SUNK_OFFSET.z, eased);
+        playerShip.rotationDegrees.x += 1.5f * std::sin(sinkTime * 2.3f) * (1.0f - progress);
+
+        if(progress >= 1.0f)
+        {
+            for(int sailor : crewCharacters)
+                characters[sailor].visible = false;
+        }
+    }
+
+    void Scene::marinerAfloat()
+    {
+        Character& mariner = characters[marinerCharacter];
+        glm::vec3 position = shipPoint(glm::vec3(-7.0f, 0.0f, -15.0f));
+        mariner.parentObject = -1;
+        mariner.localPosition = position;
+        mariner.localYaw = objects[shipIndex].rotationDegrees.y;
+        mariner.targetYaw = mariner.localYaw;
+        mariner.props[0].visible = false;
+        mariner.props[1].visible = false;
+        mariner.nextClip.clear();
+        playAnimation(marinerCharacter, "swim", true, 0.3f);
+        marinerSwimming = true;
+
+        glm::vec3 toBoat = objects[boatIndex].position - position;
+        toBoat.y = 0.0f;
+        boatTarget = position + glm::normalize(toBoat) * 2.6f;
+        boatState = BoatState::Rowing;
+    }
+
+    bool Scene::isBoatHome()
+    {
+        return boatReturned;
+    }
+
+    bool Scene::isShipSinking()
+    {
+        return shipSinking;
+    }
+
+    void Scene::marinerAshore()
+    {
+        Character& mariner = characters[marinerCharacter];
+        mariner.parentObject = -1;
+        mariner.localPosition = onCircle(PIER_ANGLE, 27.0f, PIER_DECK_HEIGHT);
+        mariner.localYaw = 90.0f - PIER_ANGLE;
+        mariner.targetYaw = mariner.localYaw;
+        playAnimation(marinerCharacter, "idle", true, 0.5f);
+        playAnimation(hermitCharacter, "bless", true, 0.5f);
+    }
+
+    void Scene::launchBoat()
+    {
+        glm::vec3 ship = shipPoint(glm::vec3(0.0f));
+        glm::vec3 toHome = boatHome - ship;
+        toHome.y = 0.0f;
+        boatTarget = ship + glm::normalize(toHome) * 24.0f;
+        boatState = BoatState::Rowing;
+        for(int person : {pilotCharacter, pilotBoyCharacter, hermitCharacter})
+            characters[person].visible = true;
+        playAnimation(pilotCharacter, "sit_talk", true, 0.3f);
+    }
+
+    void Scene::updateSwimming()
+    {
+        if(!marinerSwimming)
+            return;
+        Character& mariner = characters[marinerCharacter];
+        mariner.localPosition.y = water.heightAt(mariner.localPosition.x, mariner.localPosition.z) - SWIM_DEPTH;
+    }
+
+    void Scene::updateBoat(float deltaTime)
+    {
+        if(boatState != BoatState::Rowing && boatState != BoatState::Returning)
+            return;
+
+        SceneObject& rescue = objects[boatIndex];
+        glm::vec3 target = boatState == BoatState::Rowing ? boatTarget : boatHome;
+        glm::vec3 offset = glm::vec3(target.x - rescue.position.x, 0.0f, target.z - rescue.position.z);
+        float distance = glm::length(offset);
+        if(distance < 0.3f)
+        {
+            if(boatState == BoatState::Returning)
+                boatReturned = true;
+            boatState = boatState == BoatState::Rowing ? BoatState::Waiting : BoatState::Moored;
+            return;
+        }
+
+        glm::vec3 direction = offset / distance;
+        float speed = BOAT_SPEED * glm::clamp(distance / 4.0f, 0.25f, 1.0f);
+        rescue.position += direction * speed * deltaTime;
+        float heading = glm::degrees(std::atan2(direction.x, direction.z));
+        float turn = std::remainder(heading - rescue.rotationDegrees.y, 360.0f);
+        rescue.rotationDegrees.y += glm::clamp(turn, -40.0f * deltaTime, 40.0f * deltaTime);
+    }
+
+    bool Scene::isBoatAtMariner()
+    {
+        return boatState == BoatState::Waiting;
+    }
+
+    void Scene::marinerAboard()
+    {
+        Character& mariner = characters[marinerCharacter];
+        marinerSwimming = false;
+        mariner.parentObject = boatIndex;
+        mariner.localPosition = glm::vec3(0.0f, BOAT_FLOOR, -1.9f);
+        mariner.localYaw = 0.0f;
+        mariner.targetYaw = 0.0f;
+        playAnimation(marinerCharacter, "sit", true, 0.5f);
+    }
+
+    void Scene::pilotFit()
+    {
+        playAnimation(pilotCharacter, "death", false, 0.3f);
+        playAnimation(hermitCharacter, "kneel", true, 0.5f);
+    }
+
+    void Scene::boyLaughs()
+    {
+        playAnimation(pilotBoyCharacter, "yes", true, 0.3f);
+        boatState = BoatState::Returning;
+    }
+
+    int Scene::getPilotCharacter()
+    {
+        return pilotCharacter;
+    }
+
+    int Scene::getPilotBoyCharacter()
+    {
+        return pilotBoyCharacter;
+    }
+
+    int Scene::getHermitCharacter()
+    {
+        return hermitCharacter;
+    }
+
+    glm::vec3 Scene::getSnakeHead(int snake)
+    {
+        return waterSnakes.getHeadPosition(snake);
+    }
+
+    glm::vec3 Scene::getBoatPoint(glm::vec3 localPoint)
+    {
+        return toWorld(objects[boatIndex], localPoint);
+    }
+
+    glm::vec3 Scene::getLighthouseTop()
+    {
+        return LIGHTHOUSE_POSITION + glm::vec3(0.0f, LIGHTHOUSE_LAMP_HEIGHT, 0.0f);
     }
 
     void Scene::placeObstacles()
@@ -893,6 +1176,25 @@ namespace gps {
             return;
 
         albatrossTime += deltaTime;
+        if(albatrossState == AlbatrossState::Hung || albatrossState == AlbatrossState::Gone)
+            return;
+        if(albatrossState == AlbatrossState::Sinking)
+        {
+            SceneObject& bird = objects[albatrossIndex];
+            float surface = water.heightAt(bird.position.x, bird.position.z);
+            if(bird.position.y > surface)
+                albatrossVelocity.y -= 9.81f * deltaTime;
+            else
+                albatrossVelocity = glm::vec3(0.0f, -0.6f, 0.0f);
+            bird.position += albatrossVelocity * deltaTime;
+            bird.rotationDegrees.x -= 40.0f * deltaTime;
+            if(bird.position.y < surface - 3.0f)
+            {
+                bird.visible = false;
+                albatrossState = AlbatrossState::Gone;
+            }
+            return;
+        }
         if(albatrossState == AlbatrossState::Falling || albatrossState == AlbatrossState::Floating)
         {
             dropAlbatross(deltaTime);
@@ -1054,6 +1356,9 @@ namespace gps {
 
     void Scene::updateShip(float deltaTime)
     {
+        if(shipSinking)
+            return;
+
         float windStrength = glm::mix(0.7f, 1.0f, stormFactor) * sailingWind;
         shipController.update(deltaTime, shipSailInput, shipHelmInput, windStrength, obstacles);
 
@@ -1109,6 +1414,13 @@ namespace gps {
             character.animator.update(deltaTime);
         }
         updateSouls(deltaTime);
+        updateSinking(deltaTime);
+        updateBoat(deltaTime);
+        updateSwimming();
+        waterSnakes.update(deltaTime, getShipPosition(), water);
+
+        float seraphStep = 0.5f * deltaTime;
+        seraphFade += glm::clamp(seraphTarget - seraphFade, -seraphStep, seraphStep);
 
         float curseStep = 0.15f * deltaTime;
         curse += glm::clamp(curseTarget - curse, -curseStep, curseStep);

@@ -104,5 +104,47 @@
   "female": true,
   "hands_texture": "skin_pale_female",
   "skin_texture": "skin_pale_female"
+ },
+ {
+  "name": "pilot",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_1",
+  "hair": [
+   "Hair_SimpleParted",
+   "Hair_Beard"
+  ],
+  "hair_texture": "hair_white",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "pilot_boy",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_2",
+  "hair": [
+   "Hair_Buzzed"
+  ],
+  "hair_texture": "hair_brown",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "hermit",
+  "outfit": "Male_Ranger",
+  "outfit_texture": "ranger_3",
+  "drop": [
+   "Pauldron",
+   "Bracer"
+  ],
+  "hair": [
+   "Hair_Beard"
+  ],
+  "hair_texture": "hair_white",
+  "beard_length": 1.8,
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
  }
 ]

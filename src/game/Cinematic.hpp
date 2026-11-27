@@ -11,7 +11,7 @@
 
 namespace gps {
 
-    enum class ShotFocus {Mariner, Albatross, AlbatrossFall, Crew, CrewFall, Person, ShipBow, ShipWide, GhostShip, GhostDeck, Dice};
+    enum class ShotFocus {Mariner, Albatross, AlbatrossFall, Crew, CrewFall, Person, ShipBow, ShipWide, GhostShip, GhostDeck, Dice, Snakes, Lighthouse, Sinking, Boat, Overboard, Swimmer, BoatPerson};
 
     struct Shot
     {

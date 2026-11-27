@@ -7,6 +7,7 @@ namespace gps {
     const float DEPARTURE_DISTANCE = 150.0f;
     const float STORM_LENGTH = 20.0f;
     const float MOURNING_LENGTH = 6.0f;
+    const float HOME_DISTANCE = 130.0f;
     const float FADE_TIME = 1.2f;
     const glm::vec3 VERSE_COLOR = glm::vec3(0.93f, 0.88f, 0.76f);
     const glm::vec3 SPEECH_COLOR = glm::vec3(0.95f, 0.55f, 0.45f);
@@ -36,6 +37,41 @@ namespace gps {
         caption.speech = true;
         caption.event = event;
         captions.push_back(caption);
+    }
+
+    void Story::blessed()
+    {
+        if(chapter != Chapter::Blessing)
+            return;
+
+        enter(Chapter::Blessed);
+        say({"And I blessed them unaware:", "Sure my kind saint took pity on me,", "And I blessed them unaware."}, 7.0f, false, "blessed");
+        say({"The self-same moment I could pray;", "And from my neck so free", "The Albatross fell off, and sank", "Like lead into the sea."}, 9.0f, false, "albatrossfalls");
+        say({"Oh sleep! it is a gentle thing,", "Beloved from pole to pole!"}, 6.0f, false);
+        say({"And soon I heard a roaring wind:", "It did not come anear;", "But with its sound it shook the sails,", "That were so thin and sere."}, 9.0f, false, "rain");
+        say({"The upper air burst into life!", "And a hundred fire-flags sheen,", "To and fro they were hurried about!", "And to and fro, and in and out,", "The wan stars danced between."}, 10.0f, false, "lightning");
+        say({"They groaned, they stirred, they all uprose,", "Nor spake, nor moved their eyes;", "It had been strange, even in a dream,", "To have seen those dead men rise."}, 10.0f, false, "rise");
+        say({"The helmsman steered, the ship moved on;", "Yet never a breeze up-blew;", "The mariners all 'gan work the ropes,", "Where they were wont to do;"}, 10.0f, false, "spiritwind");
+    }
+
+    void Story::boatArrived()
+    {
+        if(chapter != Chapter::Rescue)
+            return;
+
+        enter(Chapter::Returning);
+        say({"Upon the whirl, where sank the ship,", "The boat spun round and round;", "And all was still, save that the hill", "Was telling of the sound."}, 9.0f, false, "aboard");
+        say({"I moved my lips - the Pilot shrieked", "And fell down in a fit;", "The holy Hermit raised his eyes,", "And prayed where he did sit."}, 10.0f, false, "pilotfit");
+        say({"I took the oars: the Pilot's boy,", "Who now doth crazy go,", "Laughed loud and long, and all the while", "His eyes went to and fro."}, 10.0f, false, "boylaughs");
+    }
+
+    void Story::landed()
+    {
+        if(chapter != Chapter::Returning || isShowingCaption())
+            return;
+
+        enter(Chapter::Ashore);
+        say({"And now, all in my own countree,", "I stood on the firm land!"}, 8.0f, false, "ashore");
     }
 
     std::vector<std::string> Story::takeEvents()
@@ -147,6 +183,29 @@ namespace gps {
             enter(Chapter::GhostApproach);
         else if(chapter == Chapter::Dice && !isShowingCaption())
             enter(Chapter::Alone);
+        else if(chapter == Chapter::Alone && chapterTime > 3.0f)
+        {
+            enter(Chapter::Snakes);
+            say({"The many men, so beautiful!", "And they all dead did lie:", "And a thousand thousand slimy things", "Lived on; and so did I."}, 10.0f, false);
+            say({"The moving Moon went up the sky,", "And no where did abide:", "Softly she was going up,", "And a star or two beside-"}, 9.0f, false);
+            say({"Beyond the shadow of the ship,", "I watched the water-snakes:", "They moved in tracks of shining white,", "And when they reared, the elfish light", "Fell off in hoary flakes."}, 11.0f, false, "snakes");
+            say({"Within the shadow of the ship", "I watched their rich attire:", "Blue, glossy green, and velvet black,", "They coiled and swam; and every track", "Was a flash of golden fire."}, 11.0f, false);
+            say({"O happy living things! no tongue", "Their beauty might declare:", "A spring of love gushed from my heart,"}, 9.0f, false);
+        }
+        else if(chapter == Chapter::Snakes && !isShowingCaption())
+            enter(Chapter::Blessing);
+        else if(chapter == Chapter::Blessed && !isShowingCaption())
+            enter(Chapter::Homeward);
+        else if(chapter == Chapter::Homeward && distanceFromHome < HOME_DISTANCE)
+        {
+            enter(Chapter::Home);
+            say({"Oh! dream of joy! is this indeed", "The light-house top I see?", "Is this the hill? is this the kirk?", "Is this mine own countree?"}, 10.0f, false, "home");
+            say({"Each corse lay flat, lifeless and flat,", "And, by the holy rood!", "A man all light, a seraph-man,", "On every corse there stood."}, 10.0f, false, "seraphs");
+            say({"Under the water it rumbled on,", "Still louder and more dread:", "It reached the ship, it split the bay;", "The ship went down like lead."}, 10.0f, false, "sink");
+            say({"Like one that hath been seven days drowned", "My body lay afloat;", "But swift as dreams, myself I found", "Within the Pilot's boat."}, 10.0f, false, "afloat");
+        }
+        else if(chapter == Chapter::Home && !isShowingCaption())
+            enter(Chapter::Rescue);
     }
 
     bool Story::isShowingCaption()
