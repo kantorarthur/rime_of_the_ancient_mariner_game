@@ -10,6 +10,7 @@ namespace gps {
         glfwSetKeyCallback(window, keyCallback);
         glfwSetCursorPosCallback(window, cursorCallback);
         glfwSetFramebufferSizeCallback(window, framebufferCallback);
+        glfwSetScrollCallback(window, scrollCallback);
 
         if(glfwRawMouseMotionSupported())
             glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -23,6 +24,7 @@ namespace gps {
             keysPressed[i] = false;
 
         mouseDelta = glm::vec2(0.0f);
+        scrollDelta = 0.0f;
         resized = false;
     }
 
@@ -43,6 +45,11 @@ namespace gps {
     glm::vec2 Input::getMouseDelta()
     {
         return mouseDelta;
+    }
+
+    float Input::getScrollDelta()
+    {
+        return scrollDelta;
     }
 
     void Input::setCursorCaptured(bool captured)
@@ -124,5 +131,11 @@ namespace gps {
         input->framebufferWidth = width;
         input->framebufferHeight = height;
         input->resized = true;
+    }
+
+    void Input::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        Input* input = (Input*)glfwGetWindowUserPointer(window);
+        input->scrollDelta += (float)yoffset;
     }
 }

@@ -39,6 +39,12 @@ gps::Camera myCamera(
     glm::vec3(0.0f, 5.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
+const float DEFAULT_FIELD_OF_VIEW = 45.0f;
+const float MIN_FIELD_OF_VIEW = 15.0f;
+const float MAX_FIELD_OF_VIEW = 75.0f;
+const float ZOOM_STEP = 2.5f;
+
+float fieldOfView = DEFAULT_FIELD_OF_VIEW;
 float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
 
@@ -97,7 +103,7 @@ GLenum glCheckError_(const char* file, int line)
 
 void updateProjection(int width, int height)
 {
-    projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.2f, 2000.0f);
+    projection = glm::perspective(glm::radians(fieldOfView), (float)width / (float)height, 0.2f, 2000.0f);
     myBasicShader.useShaderProgram();
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
@@ -125,6 +131,14 @@ void updateWindowTitle()
 
 void handleKeyPresses()
 {
+    if(input.getScrollDelta() != 0.0f || input.wasKeyPressed(GLFW_KEY_Z))
+    {
+        if(input.wasKeyPressed(GLFW_KEY_Z))
+            fieldOfView = DEFAULT_FIELD_OF_VIEW;
+        fieldOfView = glm::clamp(fieldOfView - input.getScrollDelta() * ZOOM_STEP, MIN_FIELD_OF_VIEW, MAX_FIELD_OF_VIEW);
+        updateProjection(myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+    }
+
     if(input.wasKeyPressed(GLFW_KEY_TAB))
         input.setCursorCaptured(!input.isCursorCaptured());
 

@@ -17,6 +17,7 @@ namespace gps {
         bool wasKeyPressed(int key);
 
         glm::vec2 getMouseDelta();
+        float getScrollDelta();
         void setCursorCaptured(bool captured);
         bool isCursorCaptured();
 
@@ -28,6 +29,7 @@ namespace gps {
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
         static void cursorCallback(GLFWwindow* window, double xpos, double ypos);
         static void framebufferCallback(GLFWwindow* window, int width, int height);
+        static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
         static constexpr int KEY_COUNT = GLFW_KEY_LAST + 1;
 
@@ -37,6 +39,7 @@ namespace gps {
         bool keysPressed[KEY_COUNT] = {};
 
         glm::vec2 mouseDelta = glm::vec2(0.0f);
+        float scrollDelta = 0.0f;
         double lastMouseX = 0.0;
         double lastMouseY = 0.0;
         bool firstMouse = true;

@@ -31,6 +31,8 @@ Run the program from the project root, since the paths to `assets/` are relative
 | Enter | skip to the next verse |
 | W A S D, Space / Left Ctrl | move the free camera |
 | Left Shift (hold) | free camera 3× faster |
+| Mouse wheel | zoom in / out |
+| Z | reset the zoom |
 | Tab | release / capture the mouse |
 | 1 / 2 / 3 | solid / wireframe / points |
 | 4 | toggle flat / smooth shading |

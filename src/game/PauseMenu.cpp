@@ -18,7 +18,7 @@ namespace gps {
 
     const char* CONTROL_KEYS[] = {
         "W / S", "A / D", "Mouse", "X", "B", "C", "Enter",
-        "W A S D", "Space / Left Ctrl", "Left Shift",
+        "W A S D", "Space / Left Ctrl", "Left Shift", "Mouse wheel", "Z",
         "Tab", "1 / 2 / 3", "4", "T", "F", "L", "Esc"
     };
 
@@ -33,6 +33,8 @@ namespace gps {
         "move the free camera",
         "free camera up / down",
         "hold to move the free camera faster",
+        "zoom in / out",
+        "reset the zoom",
         "release / capture the mouse",
         "solid / wireframe / points",
         "flat / smooth shading",
