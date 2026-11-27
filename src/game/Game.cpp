@@ -5,6 +5,8 @@
 
 namespace gps {
 
+    const float FADE_SPEED = 0.6f;
+    const float END_TITLE_TIME = 9.0f;
     const float FREE_CAMERA_SPEED = 8.0f;
     const float SPRINT_MULTIPLIER = 3.0f;
     const float MOUSE_SENSITIVITY = 0.1f;
@@ -53,6 +55,22 @@ namespace gps {
             story.boatArrived();
         if(story.getChapter() == Chapter::Returning && scene.isBoatHome())
             story.landed();
+        if(story.getChapter() == Chapter::Interlude)
+            fadeTarget = 1.0f;
+        if(story.getChapter() == Chapter::Interlude && fade >= 1.0f && !epilogueStarted)
+        {
+            epilogueStarted = true;
+            scene.startEpilogue();
+            story.beginEpilogue();
+            fadeTarget = 0.0f;
+        }
+        float fadeStep = FADE_SPEED * deltaTime;
+        fade += glm::clamp(fadeTarget - fade, -fadeStep, fadeStep);
+        if(story.getChapter() == Chapter::End && story.getChapterTime() > END_TITLE_TIME && !endReleased)
+        {
+            endReleased = true;
+            cinematic.stop();
+        }
 
         if(story.getChapter() == Chapter::Crossbow && input.wasKeyPressed(GLFW_KEY_X) && scene.raiseCrossbow())
             filmShooting(scene);
@@ -253,8 +271,40 @@ namespace gps {
         else if(event == "ashore")
         {
             scene.marinerAshore();
-            cinematic.play({{ShotFocus::Person, scene.getMarinerCharacter(), 8.0f}, {ShotFocus::Lighthouse, 0, 8.0f}});
+            cinematic.play({{ShotFocus::Person, scene.getMarinerCharacter(), 60.0f}});
         }
+        else if(event == "wedding")
+            cinematic.play({{ShotFocus::Wedding, 0, 12.0f}, {ShotFocus::Person, scene.getOldMarinerCharacter(), 60.0f}});
+        else if(event == "doors")
+            cinematic.play({{ShotFocus::Person, scene.getWeddingGuestCharacter(), 4.0f}, {ShotFocus::Wedding, 1, 60.0f}});
+        else if(event == "bride")
+        {
+            scene.brideJoins();
+            cinematic.play({{ShotFocus::Person, scene.getBrideCharacter(), 60.0f}});
+        }
+        else if(event == "listen")
+        {
+            scene.weddingListens();
+            cinematic.play({{ShotFocus::Person, scene.getOldMarinerCharacter(), 5.0f}, {ShotFocus::Wedding, 2, 60.0f}});
+        }
+        else if(event == "alonesea")
+            cinematic.play({{ShotFocus::Wedding, 3, 60.0f}});
+        else if(event == "farewell")
+        {
+            scene.marinerBlessesGuests();
+            scene.reviveAlbatross();
+            cinematic.play({{ShotFocus::Person, scene.getOldMarinerCharacter(), 5.0f}, {ShotFocus::WeddingAlbatross, 0, 60.0f}});
+        }
+        else if(event == "loveth")
+            cinematic.play({{ShotFocus::Wedding, 4, 60.0f}});
+        else if(event == "gone")
+        {
+            scene.oldMarinerLeaves();
+            scene.guestTurnsAway();
+            cinematic.play({{ShotFocus::Wedding, 5, 60.0f}});
+        }
+        else if(event == "wiser")
+            cinematic.play({{ShotFocus::Person, scene.getWeddingGuestCharacter(), 6.0f}, {ShotFocus::Wedding, 6, 14.0f}, {ShotFocus::Wedding, 7, 600.0f}});
         else if(event == "alone")
         {
             scene.marinerDespairs();
@@ -350,7 +400,15 @@ namespace gps {
     {
         text.begin(width, height);
         cinematic.drawBars(text, width, height);
+        if(fade > 0.0f)
+            text.drawRectangle(0.0f, 0.0f, (float)width, (float)height, glm::vec4(0.0f, 0.0f, 0.0f, fade));
         story.draw(text, width, height);
+        if(story.getChapter() == Chapter::End && !endReleased)
+        {
+            float time = story.getChapterTime();
+            float alpha = glm::smoothstep(0.0f, 2.0f, time) * (1.0f - glm::smoothstep(END_TITLE_TIME - 2.0f, END_TITLE_TIME, time));
+            text.drawTextCentered("THE END", width * 0.5f, height * 0.42f, height / 160.0f, glm::vec4(0.95f, 0.9f, 0.8f, alpha));
+        }
 
         if(cinematic.isPlaying())
         {

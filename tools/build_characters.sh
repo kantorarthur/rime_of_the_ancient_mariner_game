@@ -29,11 +29,15 @@ texture "$OUTFITS/Textures/Ranger/T_Ranger_3_BaseColor.png" ranger_3
 texture "$BASE/Base Characters/Textures/T_Superhero_Male_Ligh.png" skin_head_male
 texture "$BASE/Base Characters/Textures/T_Superhero_Female_Light_BaseColor.png" skin_head_female
 texture "$OUTFITS/Exports/glTF (Godot-Unreal)/Outfits/T_Regular_Male_Dark_BaseColor.png" skin_hands_male
+texture "$OUTFITS/Exports/glTF (Godot-Unreal)/Outfits/T_Regular_Female_Dark_BaseColor.png" skin_hands_female
 convert "$BASE/Base Characters/Godot - UE/T_Eye_Brown.png" -resize 256x256 -quality 90 "$TEXTURES/eyes.jpg"
 convert "$TEXTURES/ranger_1.jpg" -modulate 35,10 -quality 90 "$TEXTURES/ranger_dark.jpg"
 convert "$TEXTURES/skin_head_male.jpg" -modulate 80,5 -quality 90 "$TEXTURES/skin_grey_male.jpg"
 convert "$TEXTURES/skin_hands_male.jpg" -modulate 80,5 -quality 90 "$TEXTURES/skin_grey_hands.jpg"
 convert "$TEXTURES/skin_head_female.jpg" -modulate 135,12 -quality 90 "$TEXTURES/skin_pale_female.jpg"
+convert "$TEXTURES/peasant_1.jpg" -colorspace gray -auto-level -sigmoidal-contrast 3,35% -colorspace sRGB +level-colors '#a0978a','#fffaf2' -quality 90 "$TEXTURES/peasant_bride.jpg"
+convert "$TEXTURES/peasant_2.jpg" -colorspace gray -auto-level -colorspace sRGB +level-colors '#0b0f1c','#6b7fae' -quality 90 "$TEXTURES/peasant_groom.jpg"
+convert "$TEXTURES/peasant_2.jpg" -colorspace gray -auto-level -colorspace sRGB +level-colors '#2a0909','#c8574a' -quality 90 "$TEXTURES/peasant_red.jpg"
 hair '#3a2616' hair_brown
 hair '#1c1714' hair_black
 hair '#d8d4cc' hair_white

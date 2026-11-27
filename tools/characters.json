@@ -146,5 +146,88 @@
   "female": false,
   "hands_texture": "skin_hands_male",
   "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "bride",
+  "outfit": "Female_Peasant",
+  "outfit_texture": "peasant_bride",
+  "hair": [
+   "Hair_Buns"
+  ],
+  "hair_texture": "hair_gold",
+  "female": true,
+  "hands_texture": "skin_hands_female",
+  "skin_texture": "skin_head_female"
+ },
+ {
+  "name": "groom",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_groom",
+  "hair": [
+   "Hair_SimpleParted"
+  ],
+  "hair_texture": "hair_brown",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "wedding_guest",
+  "outfit": "Male_Peasant",
+  "outfit_texture": "peasant_1",
+  "hair": [
+   "Hair_SimpleParted",
+   "Hair_Beard"
+  ],
+  "hair_texture": "hair_gold",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "guest_1",
+  "outfit": "Female_Ranger",
+  "outfit_texture": "ranger_1",
+  "drop": [
+   "Pauldron",
+   "Bracer",
+   "Hood"
+  ],
+  "hair": [
+   "Hair_Long"
+  ],
+  "hair_texture": "hair_brown",
+  "female": true,
+  "hands_texture": "skin_hands_female",
+  "skin_texture": "skin_head_female"
+ },
+ {
+  "name": "guest_2",
+  "outfit": "Female_Peasant",
+  "outfit_texture": "peasant_red",
+  "hair": [
+   "Hair_Buns"
+  ],
+  "hair_texture": "hair_black",
+  "female": true,
+  "hands_texture": "skin_hands_female",
+  "skin_texture": "skin_head_female"
+ },
+ {
+  "name": "guest_3",
+  "outfit": "Male_Ranger",
+  "outfit_texture": "ranger_3",
+  "drop": [
+   "Pauldron",
+   "Bracer",
+   "Hood"
+  ],
+  "hair": [
+   "Hair_Buzzed"
+  ],
+  "hair_texture": "hair_black",
+  "female": false,
+  "hands_texture": "skin_hands_male",
+  "skin_texture": "skin_head_male"
  }
 ]

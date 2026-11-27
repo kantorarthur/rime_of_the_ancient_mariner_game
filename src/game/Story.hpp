@@ -8,7 +8,7 @@
 
 namespace gps {
 
-    enum class Chapter {Prologue, Departure, Storm, Albatross, Crossbow, Shot, Becalmed, GhostApproach, Dice, Alone, Snakes, Blessing, Blessed, Homeward, Home, Rescue, Returning, Ashore};
+    enum class Chapter {Prologue, Departure, Storm, Albatross, Crossbow, Shot, Becalmed, GhostApproach, Dice, Alone, Snakes, Blessing, Blessed, Homeward, Home, Rescue, Returning, Ashore, Interlude, Epilogue, End};
 
     struct Caption
     {
@@ -29,6 +29,8 @@ namespace gps {
         void blessed();
         void boatArrived();
         void landed();
+        void beginEpilogue();
+        float getChapterTime();
         void skipCaption();
         std::vector<std::string> takeEvents();
         void draw(gps::TextRenderer& text, int width, int height);

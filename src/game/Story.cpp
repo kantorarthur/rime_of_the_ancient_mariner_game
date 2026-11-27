@@ -74,6 +74,28 @@ namespace gps {
         say({"And now, all in my own countree,", "I stood on the firm land!"}, 8.0f, false, "ashore");
     }
 
+    void Story::beginEpilogue()
+    {
+        if(chapter != Chapter::Interlude)
+            return;
+
+        enter(Chapter::Epilogue);
+        say({"It is an ancient Mariner,", "And he stoppeth one of three.", "'By thy long grey beard and glittering eye,", "Now wherefore stopp'st thou me?"}, 10.0f, false, "wedding");
+        say({"The Bridegroom's doors are opened wide,", "And I am next of kin;", "The guests are met, the feast is set:", "May'st hear the merry din.'"}, 10.0f, false, "doors");
+        say({"The Bride hath paced into the hall,", "Red as a rose is she;", "Nodding their heads before her goes", "The merry minstrelsy."}, 10.0f, false, "bride");
+        say({"He holds him with his glittering eye-", "The Wedding-Guest stood still,", "And listens like a three years' child:", "The Mariner hath his will."}, 10.0f, false, "listen");
+        say({"O Wedding-Guest! this soul hath been", "Alone on a wide wide sea:", "So lonely 'twas, that God himself", "Scarce seemed there to be."}, 10.0f, false, "alonesea");
+        say({"Farewell, farewell! but this I tell", "To thee, thou Wedding-Guest!", "He prayeth well, who loveth well", "Both man and bird and beast."}, 10.0f, false, "farewell");
+        say({"He prayeth best, who loveth best", "All things both great and small;", "For the dear God who loveth us,", "He made and loveth all."}, 10.0f, false, "loveth");
+        say({"The Mariner, whose eye is bright,", "Whose beard with age is hoar,", "Is gone: and now the Wedding-Guest", "Turned from the bridegroom's door."}, 11.0f, false, "gone");
+        say({"He went like one that hath been stunned,", "And is of sense forlorn:", "A sadder and a wiser man,", "He rose the morrow morn."}, 11.0f, false, "wiser");
+    }
+
+    float Story::getChapterTime()
+    {
+        return chapterTime;
+    }
+
     std::vector<std::string> Story::takeEvents()
     {
         std::vector<std::string> taken = events;
@@ -206,6 +228,10 @@ namespace gps {
         }
         else if(chapter == Chapter::Home && !isShowingCaption())
             enter(Chapter::Rescue);
+        else if(chapter == Chapter::Ashore && !isShowingCaption() && chapterTime > 9.0f)
+            enter(Chapter::Interlude);
+        else if(chapter == Chapter::Epilogue && !isShowingCaption())
+            enter(Chapter::End);
     }
 
     bool Story::isShowingCaption()

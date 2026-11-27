@@ -11,7 +11,7 @@
 
 namespace gps {
 
-    enum class ShotFocus {Mariner, Albatross, AlbatrossFall, Crew, CrewFall, Person, ShipBow, ShipWide, GhostShip, GhostDeck, Dice, Snakes, Lighthouse, Sinking, Boat, Overboard, Swimmer, BoatPerson};
+    enum class ShotFocus {Mariner, Albatross, AlbatrossFall, Crew, CrewFall, Person, ShipBow, ShipWide, GhostShip, GhostDeck, Dice, Snakes, Lighthouse, Sinking, Boat, Overboard, Swimmer, BoatPerson, Wedding, WeddingAlbatross};
 
     struct Shot
     {
@@ -25,6 +25,7 @@ namespace gps {
     public:
         void play(std::vector<Shot> newShots);
         bool isPlaying();
+        void stop();
         void update(float deltaTime, gps::Camera& camera, gps::Scene& scene);
         void drawBars(gps::TextRenderer& text, int width, int height);
 
@@ -39,6 +40,7 @@ namespace gps {
         void frame(Shot& shot, gps::Camera& camera, gps::Scene& scene);
         void framePerson(int character, float progress, glm::vec3& eye, glm::vec3& target, gps::Scene& scene);
         void startShot(gps::Scene& scene);
+        void frameWedding(int index, float progress, glm::vec3& eye, glm::vec3& target, gps::Scene& scene);
     };
 }
 

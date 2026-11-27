@@ -26,6 +26,14 @@ namespace gps {
 
     enum class Weather {Calm, Storm};
     enum class AlbatrossState {CirclingLighthouse, FollowingShip, Falling, Floating, Hung, Sinking, Gone};
+    struct Walk
+    {
+        int character;
+        glm::vec3 target;
+        std::string arriveClip;
+        bool vanish;
+    };
+
     enum class BoatState {Moored, Rowing, Waiting, Returning};
     enum class GhostState {Hidden, Approaching, Alongside, Leaving};
 
@@ -125,6 +133,18 @@ namespace gps {
         int getPilotCharacter();
         int getPilotBoyCharacter();
         int getHermitCharacter();
+        void startEpilogue();
+        void brideJoins();
+        void weddingListens();
+        void marinerBlessesGuests();
+        void reviveAlbatross();
+        void oldMarinerLeaves();
+        void guestTurnsAway();
+        glm::vec3 weddingPoint(glm::vec3 localPoint);
+        int getOldMarinerCharacter();
+        int getWeddingGuestCharacter();
+        int getGroomCharacter();
+        int getBrideCharacter();
         glm::vec3 getSnakeHead(int snake);
         glm::vec3 getBoatPoint(glm::vec3 localPoint);
         glm::vec3 getLighthouseTop();
@@ -198,6 +218,14 @@ namespace gps {
 
         int ghostIndex = -1;
         int ghostLight = -1;
+        int weddingLight = -1;
+        int houseIndex = -1;
+        int oldMarinerCharacter = -1;
+        int weddingGuestCharacter = -1;
+        int groomCharacter = -1;
+        int brideCharacter = -1;
+        std::vector<int> guestCharacters;
+        std::vector<Walk> walks;
         GhostState ghostState = GhostState::Hidden;
         float ghostTime = 0.0f;
         float ghostFade = 0.0f;
@@ -271,6 +299,10 @@ namespace gps {
         void turnCharacters(float deltaTime);
         void placeGhostShip();
         void updateSinking(float deltaTime);
+        void placeWedding();
+        std::vector<int> weddingCharacters();
+        void walkCharacter(int character, glm::vec3 localTarget, std::string clip, std::string arriveClip, bool vanish);
+        void updateWalks(float deltaTime);
         void planBoatRoute(glm::vec3 from, glm::vec3 to, bool leaving);
         void updateBoat(float deltaTime);
         void updateSwimming();

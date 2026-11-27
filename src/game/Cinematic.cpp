@@ -12,6 +12,11 @@ namespace gps {
         shotTime = 0.0f;
     }
 
+    void Cinematic::stop()
+    {
+        current = shots.size();
+    }
+
     bool Cinematic::isPlaying()
     {
         return current < shots.size();
@@ -122,6 +127,13 @@ namespace gps {
             eye = scene.getGhostShipPoint(glm::vec3(glm::mix(-7.0f, -5.5f, progress), 8.0f, 5.5f));
             target = scene.getGhostShipPoint(glm::vec3(0.0f, 5.3f, 0.0f));
         }
+        else if(shot.focus == ShotFocus::Wedding)
+            frameWedding(shot.index, progress, eye, target, scene);
+        else if(shot.focus == ShotFocus::WeddingAlbatross)
+        {
+            eye = scene.weddingPoint(glm::vec3(1.0f, 1.7f, 9.0f));
+            target = scene.getAlbatrossPosition();
+        }
         else if(shot.focus == ShotFocus::Swimmer)
         {
             glm::vec3 head = scene.characterHead(shot.index);
@@ -187,6 +199,48 @@ namespace gps {
         }
 
         camera.lookAt(eye, target);
+    }
+
+    void Cinematic::frameWedding(int index, float progress, glm::vec3& eye, glm::vec3& target, gps::Scene& scene)
+    {
+        float ease = glm::smoothstep(0.0f, 1.0f, progress);
+        if(index == 0)
+        {
+            eye = scene.weddingPoint(glm::mix(glm::vec3(9.0f, 4.5f, 18.0f), glm::vec3(5.0f, 2.8f, 12.5f), ease));
+            target = scene.weddingPoint(glm::vec3(0.5f, 1.4f, 5.5f));
+        }
+        else if(index == 1)
+        {
+            eye = scene.weddingPoint(glm::mix(glm::vec3(-4.0f, 1.8f, 10.0f), glm::vec3(-3.2f, 1.7f, 8.8f), ease));
+            target = scene.weddingPoint(glm::vec3(1.6f, 1.5f, 4.0f));
+        }
+        else if(index == 2)
+        {
+            eye = scene.weddingPoint(glm::mix(glm::vec3(2.3f, 1.9f, 9.6f), glm::vec3(2.0f, 1.8f, 9.0f), ease));
+            target = scene.weddingPoint(glm::vec3(-0.6f, 1.4f, 5.4f));
+        }
+        else if(index == 3)
+        {
+            eye = scene.weddingPoint(glm::vec3(0.8f, 2.0f, 9.4f));
+            target = scene.weddingPoint(glm::mix(glm::vec3(4.0f, 0.0f, 40.0f), glm::vec3(-6.0f, 0.0f, 40.0f), ease));
+        }
+        else if(index == 4)
+        {
+            eye = scene.weddingPoint(glm::mix(glm::vec3(-5.0f, 2.2f, 14.0f), glm::vec3(-6.0f, 2.6f, 16.0f), ease));
+            target = scene.weddingPoint(glm::vec3(2.0f, 6.0f, -2.0f));
+        }
+        else if(index == 5)
+        {
+            eye = scene.weddingPoint(glm::vec3(-4.5f, 2.4f, 6.0f));
+            target = scene.characterPoint(scene.getOldMarinerCharacter(), glm::vec3(0.0f, 1.2f, 0.0f));
+        }
+        else
+        {
+            if(index != 6)
+                ease = 1.0f;
+            eye = scene.weddingPoint(glm::mix(glm::vec3(0.5f, 2.0f, 11.0f), glm::vec3(-3.0f, 16.0f, 24.0f), ease));
+            target = glm::mix(scene.weddingPoint(glm::vec3(0.0f, 1.5f, 5.5f)), scene.getLighthouseTop(), ease);
+        }
     }
 
     void Cinematic::framePerson(int character, float progress, glm::vec3& eye, glm::vec3& target, gps::Scene& scene)

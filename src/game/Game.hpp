@@ -28,6 +28,10 @@ namespace gps {
         ControlMode mode = ControlMode::Ship;
         Story story;
         Cinematic cinematic;
+        float fade = 0.0f;
+        float fadeTarget = 0.0f;
+        bool epilogueStarted = false;
+        bool endReleased = false;
         bool albatrossFilmed = false;
         Chapter lastChapter = Chapter::Prologue;
 

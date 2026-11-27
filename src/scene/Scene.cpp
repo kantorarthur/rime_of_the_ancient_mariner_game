@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 
@@ -75,11 +76,15 @@ namespace gps {
     const float BOAT_ROUTE_RADIUS = 62.0f;
     const float BOAT_ROUTE_STEP = 30.0f;
     const float PIER_HALF_WIDTH = 1.4f;
+    const float WEDDING_FLOOR = 0.08f;
+    const float WALK_SPEED = 1.1f;
+    const glm::vec3 WEDDING_LIGHT = glm::vec3(0.0f, 2.3f, 3.9f);
+    const glm::vec3 WEDDING_LIGHT_COLOR = glm::vec3(1.0f, 0.62f, 0.3f) * 1.2f;
     const float BOAT_FLOOR = 0.12f;
     const glm::mat4 CROSSBOW_GRIP = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.06f));
 
     const std::string CHARACTER_FOLDER = "assets/characters/";
-    const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4", "death", "life_in_death", "pilot", "pilot_boy", "hermit"};
+    const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4", "death", "life_in_death", "pilot", "pilot_boy", "hermit", "old_mariner", "bride", "groom", "wedding_guest", "guest_1", "guest_2", "guest_3"};
     const char* ANIMATION_CLIPS[] = {"idle", "talk", "helm", "death", "sit", "sit_talk", "aim", "shoot", "bless", "bless_hold", "grieve", "kneel", "dance", "walk", "walk_formal", "swim", "hit", "interact", "haul", "rail", "rail_call", "shake_head", "fold_arms", "lantern", "rise", "zombie", "zombie_walk", "yes", "throw", "consume"};
 
     const int RAIN_DROP_COUNT = 12000;
@@ -168,6 +173,7 @@ namespace gps {
 
         add(lighthouse, LIGHTHOUSE_POSITION, 0.0f, 1.0f).emissiveStrength = 4.0f;
         add(house, glm::vec3(-5.0f, 3.45f, -1.0f), 320.0f, 1.0f);
+        houseIndex = (int)objects.size() - 1;
 
         float deckY = PIER_DECK_HEIGHT - PIER_MODEL_DECK;
         for(int i = 0; i < 4; i++)
@@ -291,6 +297,178 @@ namespace gps {
         lifeInDeathCharacter = addCharacter("life_in_death", glm::vec3(0.95f, GHOST_DECK, 0.0f), -90.0f, ghostIndex);
         playAnimation(lifeInDeathCharacter, "sit_talk", true, 0.0f);
         characters[lifeInDeathCharacter].visible = false;
+
+        placeWedding();
+    }
+
+    void Scene::placeWedding()
+    {
+        oldMarinerCharacter = addCharacter("old_mariner", glm::vec3(1.3f, WEDDING_FLOOR, 7.6f), 0.0f, houseIndex);
+        weddingGuestCharacter = addCharacter("wedding_guest", glm::vec3(0.5f, WEDDING_FLOOR, 5.7f), 0.0f, houseIndex);
+        groomCharacter = addCharacter("groom", glm::vec3(-0.5f, WEDDING_FLOOR, 5.3f), 0.0f, houseIndex);
+        brideCharacter = addCharacter("bride", glm::vec3(-0.2f, WEDDING_FLOOR, 3.3f), 0.0f, houseIndex);
+        guestCharacters.push_back(addCharacter("guest_1", glm::vec3(2.7f, WEDDING_FLOOR, 4.1f), 0.0f, houseIndex));
+        guestCharacters.push_back(addCharacter("guest_3", glm::vec3(3.5f, WEDDING_FLOOR, 4.7f), 0.0f, houseIndex));
+        guestCharacters.push_back(addCharacter("guest_2", glm::vec3(-2.8f, WEDDING_FLOOR, 4.5f), 0.0f, houseIndex));
+
+        Character& teller = characters[oldMarinerCharacter];
+        for(int person : {weddingGuestCharacter, groomCharacter, guestCharacters[2]})
+        {
+            Character& listener = characters[person];
+            listener.localYaw = yawTowards(listener, teller.localPosition);
+            listener.targetYaw = listener.localYaw;
+        }
+        teller.localYaw = yawTowards(teller, characters[weddingGuestCharacter].localPosition);
+        teller.targetYaw = teller.localYaw;
+        Character& dancer = characters[guestCharacters[0]];
+        Character& partner = characters[guestCharacters[1]];
+        dancer.localYaw = yawTowards(dancer, partner.localPosition);
+        partner.localYaw = yawTowards(partner, dancer.localPosition);
+        dancer.targetYaw = dancer.localYaw;
+        partner.targetYaw = partner.localYaw;
+        characters[brideCharacter].localYaw = 0.0f;
+        characters[brideCharacter].targetYaw = 0.0f;
+
+        playAnimation(oldMarinerCharacter, "talk", true, 0.0f);
+        playAnimation(weddingGuestCharacter, "fold_arms", true, 0.0f);
+        playAnimation(groomCharacter, "idle", true, 0.0f);
+        playAnimation(brideCharacter, "idle", true, 0.0f);
+        playAnimation(guestCharacters[0], "dance", true, 0.0f);
+        playAnimation(guestCharacters[1], "dance", true, 0.0f);
+        playAnimation(guestCharacters[2], "idle", true, 0.0f);
+        for(int person : weddingCharacters())
+            characters[person].visible = false;
+    }
+
+    std::vector<int> Scene::weddingCharacters()
+    {
+        std::vector<int> people = {oldMarinerCharacter, weddingGuestCharacter, groomCharacter, brideCharacter};
+        people.insert(people.end(), guestCharacters.begin(), guestCharacters.end());
+        return people;
+    }
+
+    void Scene::startEpilogue()
+    {
+        for(int person : {marinerCharacter, pilotCharacter, pilotBoyCharacter, hermitCharacter})
+            characters[person].visible = false;
+        for(int sailor : crewCharacters)
+            characters[sailor].visible = false;
+        for(int person : weddingCharacters())
+            characters[person].visible = true;
+
+        pointLights[weddingLight].position = toWorld(objects[houseIndex], WEDDING_LIGHT);
+        pointLights[weddingLight].color = WEDDING_LIGHT_COLOR;
+        seraphTarget = 0.0f;
+        seraphFade = 0.0f;
+        setWeather(Weather::Calm);
+    }
+
+    void Scene::walkCharacter(int character, glm::vec3 localTarget, std::string clip, std::string arriveClip, bool vanish)
+    {
+        for(size_t i = 0; i < walks.size(); i++)
+        {
+            if(walks[i].character != character)
+                continue;
+            walks.erase(walks.begin() + i);
+            break;
+        }
+        walks.push_back({character, localTarget, arriveClip, vanish});
+        playAnimation(character, clip, true, 0.4f);
+    }
+
+    void Scene::updateWalks(float deltaTime)
+    {
+        for(size_t i = 0; i < walks.size(); i++)
+        {
+            Walk& walk = walks[i];
+            Character& person = characters[walk.character];
+            glm::vec3 offset = walk.target - person.localPosition;
+            offset.y = 0.0f;
+            float distance = glm::length(offset);
+            if(distance < 0.05f)
+            {
+                if(walk.vanish)
+                    person.visible = false;
+                if(!walk.arriveClip.empty())
+                    playAnimation(walk.character, walk.arriveClip, true, 0.4f);
+                walks.erase(walks.begin() + i);
+                i--;
+                continue;
+            }
+            person.targetYaw = glm::degrees(std::atan2(offset.x, offset.z));
+            person.localPosition += offset / distance * glm::min(WALK_SPEED * deltaTime, distance);
+        }
+    }
+
+    void Scene::brideJoins()
+    {
+        walkCharacter(brideCharacter, glm::vec3(-1.4f, WEDDING_FLOOR, 5.5f), "walk_formal", "idle", false);
+    }
+
+    void Scene::weddingListens()
+    {
+        Character& teller = characters[oldMarinerCharacter];
+        for(int person : {brideCharacter, groomCharacter, weddingGuestCharacter, guestCharacters[2]})
+            characters[person].targetYaw = yawTowards(characters[person], teller.localPosition);
+        playAnimation(weddingGuestCharacter, "idle", true, 0.6f);
+        playAnimation(guestCharacters[0], "idle", true, 0.8f);
+        playAnimation(guestCharacters[1], "idle", true, 0.8f);
+        for(int dancer : {guestCharacters[0], guestCharacters[1]})
+            characters[dancer].targetYaw = yawTowards(characters[dancer], teller.localPosition);
+    }
+
+    void Scene::marinerBlessesGuests()
+    {
+        playAnimation(oldMarinerCharacter, "bless_hold", true, 0.6f);
+    }
+
+    void Scene::reviveAlbatross()
+    {
+        SceneObject& bird = objects[albatrossIndex];
+        bird.visible = true;
+        bird.scale = 1.0f;
+        albatrossFollow = 0.0f;
+        albatrossState = AlbatrossState::CirclingLighthouse;
+    }
+
+    void Scene::oldMarinerLeaves()
+    {
+        walkCharacter(oldMarinerCharacter, glm::vec3(5.0f, WEDDING_FLOOR, 15.5f), "walk", "", true);
+    }
+
+    void Scene::guestTurnsAway()
+    {
+        walkCharacter(weddingGuestCharacter, glm::vec3(-3.2f, WEDDING_FLOOR, 9.5f), "walk", "shake_head", false);
+        playAnimation(groomCharacter, "talk", true, 0.6f);
+        characters[groomCharacter].targetYaw = yawTowards(characters[groomCharacter], characters[brideCharacter].localPosition);
+        characters[brideCharacter].targetYaw = yawTowards(characters[brideCharacter], characters[groomCharacter].localPosition);
+        playAnimation(guestCharacters[0], "dance", true, 0.8f);
+        playAnimation(guestCharacters[1], "dance", true, 0.8f);
+    }
+
+    glm::vec3 Scene::weddingPoint(glm::vec3 localPoint)
+    {
+        return toWorld(objects[houseIndex], localPoint);
+    }
+
+    int Scene::getOldMarinerCharacter()
+    {
+        return oldMarinerCharacter;
+    }
+
+    int Scene::getWeddingGuestCharacter()
+    {
+        return weddingGuestCharacter;
+    }
+
+    int Scene::getGroomCharacter()
+    {
+        return groomCharacter;
+    }
+
+    int Scene::getBrideCharacter()
+    {
+        return brideCharacter;
     }
 
     glm::mat4 Scene::characterMatrix(Character& character)
@@ -1040,6 +1218,9 @@ namespace gps {
         pointLights.push_back({glm::vec3(0.0f, -100.0f, 0.0f), glm::vec3(0.0f), 1.0f, 0.2f, 0.08f});
         ghostLight = (int)pointLights.size() - 1;
 
+        pointLights.push_back({glm::vec3(0.0f, -100.0f, 0.0f), glm::vec3(0.0f), 1.0f, 0.35f, 0.15f});
+        weddingLight = (int)pointLights.size() - 1;
+
         beam.position = lamp;
         beam.color = glm::vec3(1.0f, 0.92f, 0.72f) * 3.5f;
         beam.cutOffDegrees = 5.0f;
@@ -1465,6 +1646,7 @@ namespace gps {
         updateSinking(deltaTime);
         updateBoat(deltaTime);
         updateSwimming();
+        updateWalks(deltaTime);
         waterSnakes.update(deltaTime, getShipPosition(), water);
 
         float seraphStep = 0.5f * deltaTime;
