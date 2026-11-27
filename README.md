@@ -7,6 +7,10 @@
 
 A story-driven 3D game written in C++ with OpenGL, based on Coleridge's poem. You sail the mariner's ship around a lighthouse island at night, shoot the albatross, live through the curse, the ghost ship and the dying crew, bless the water-snakes, and come home to the lighthouse. The game ends with the old mariner telling his tale outside a wedding. The verses of the poem appear on screen as the story unfolds.
 
+## 1 Minute demo Gameplay
+
+https://github.com/user-attachments/assets/0729952c-22c7-40e6-9cc8-5d69ec31db99
+
 ## Full Gameplay (Click the image - you will be redirected to the youtube video)
 
 [![Full Gameplay](https://img.youtube.com/vi/5DbbJfZq_Qg/maxresdefault.jpg)](https://www.youtube.com/watch?v=5DbbJfZq_Qg)
