@@ -5,12 +5,12 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 NAME=rime_of_the_ancient_mariner
 BUILD="$ROOT/build-release"
 OUT="$ROOT/release"
-STAGE="$OUT/$NAME"
+STAGE="$OUT/linux/$NAME"
 
 cmake -S "$ROOT" -B "$BUILD" -DCMAKE_BUILD_TYPE=Release
 cmake --build "$BUILD" -j
 
-rm -rf "$OUT"
+rm -rf "$OUT/linux" "$OUT/$NAME-linux.zip"
 mkdir -p "$STAGE/lib" "$STAGE/licenses"
 cp "$BUILD/$NAME" "$STAGE/"
 cp -r "$ROOT/assets" "$STAGE/"
@@ -37,6 +37,7 @@ exec "./rime_of_the_ancient_mariner" "$@"
 EOF
 chmod +x "$STAGE/$NAME.sh" "$STAGE/$NAME"
 
-cd "$OUT"
-python3 -m zipfile -c "$NAME-linux.zip" "$NAME"
+cd "$OUT/linux"
+python3 -m zipfile -c "$OUT/$NAME-linux.zip" "$NAME"
+rm -rf "$OUT/linux"
 echo "created $OUT/$NAME-linux.zip"

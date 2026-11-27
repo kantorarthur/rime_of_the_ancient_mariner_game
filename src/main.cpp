@@ -21,6 +21,16 @@
 #include <stdexcept>
 #include <string>
 
+#if defined(_WIN32)
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #include <windows.h>
+#endif
+
 gps::Window myWindow;
 gps::Input input;
 gps::ViewMode viewMode;
@@ -291,14 +301,25 @@ void cleanup()
     myWindow.Delete();
 }
 
+std::filesystem::path executablePath()
+{
+#if defined(_WIN32)
+    wchar_t buffer[MAX_PATH];
+    GetModuleFileNameW(NULL, buffer, MAX_PATH);
+    return std::filesystem::path(buffer);
+#else
+    std::error_code error;
+    return std::filesystem::read_symlink("/proc/self/exe", error);
+#endif
+}
+
 void moveToAssetsFolder()
 {
     if(std::filesystem::exists("assets/shaders"))
         return;
 
-    std::error_code error;
-    std::filesystem::path executable = std::filesystem::read_symlink("/proc/self/exe", error);
-    if(error)
+    std::filesystem::path executable = executablePath();
+    if(executable.empty())
         return;
 
     for(std::filesystem::path folder = executable.parent_path(); folder != folder.root_path(); folder = folder.parent_path())

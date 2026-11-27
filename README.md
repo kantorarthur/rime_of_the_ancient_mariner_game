@@ -22,11 +22,12 @@ I really loved Iron Maiden's song "Rime of the Ancient Mariner" (*Powerslave*, 1
 
 Rendering techniques: Blinn-Phong lighting with directional, point and spot lights, shadow mapping with PCF, Gerstner waves with Fresnel reflections, analytic height fog, a volumetric lighthouse beam, instanced rain, procedural lightning, skeletal animation and cinematic cameras.
 
-## Download and play (Linux)
+## Download and play
 
-1. Download `rime_of_the_ancient_mariner-linux.zip` from the [Releases](https://github.com/kantorarthur/rime_of_the_ancient_mariner_game/releases) page.
-2. Unzip it.
-3. In the unzipped folder, run `./rime_of_the_ancient_mariner.sh`.
+Download the archive for your system from the [Releases](https://github.com/kantorarthur/rime_of_the_ancient_mariner_game/releases) page and unzip it.
+
+- **Linux:** `rime_of_the_ancient_mariner-linux.zip`, then run `./rime_of_the_ancient_mariner.sh` in the unzipped folder.
+- **Windows:** `rime_of_the_ancient_mariner-windows.zip`, then double-click `rime_of_the_ancient_mariner.exe` in the unzipped folder.
 
 It needs a graphics card with OpenGL 4.1. Press Esc in the game for the menu and the list of controls.
 
@@ -39,7 +40,7 @@ cmake --build build -j
 ./build/rime_of_the_ancient_mariner
 ```
 
-`tools/make_release.sh` builds the game and packs it, with its assets and libraries, into `release/rime_of_the_ancient_mariner-linux.zip`.
+`tools/make_release.sh` builds the game and packs it, with its assets and libraries, into `release/rime_of_the_ancient_mariner-linux.zip`. `tools/make_release_windows.sh` cross-compiles the Windows version with MinGW-w64 (`sudo apt install mingw-w64`) into `release/rime_of_the_ancient_mariner-windows.zip`.
 
 ## Project layout
 
@@ -49,6 +50,6 @@ cmake --build build -j
 - `src/game`: the story, the cinematic cameras, the ship controls and the pause menu
 - `external`: stb_image, stb_easy_font, tinyobjloader
 - `assets`: models, characters and their animations, skyboxes and shaders loaded at runtime
-- `tools`: Blender, ImageMagick and Python scripts that build the assets, and the release script
+- `tools`: Blender, ImageMagick and Python scripts that build the assets, and the release scripts
 
 Asset sources and licenses are listed in `CREDITS.md`.

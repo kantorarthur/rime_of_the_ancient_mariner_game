@@ -12,6 +12,7 @@ Claude outputs/
 # Build output
 build/
 build-release/
+build-windows/
 release/
 out/
 bin/
