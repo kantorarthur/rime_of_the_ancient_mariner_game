@@ -39,6 +39,46 @@ Download the archive for your system from the [Releases](https://github.com/kant
 
 It needs a graphics card with OpenGL 4.1. Press Esc in the game for the menu and the list of controls.
 
+## Evolution of the game
+
+<details>
+<summary>Evolution of the game (click to open)</summary>
+
+<br>
+
+**Version 1.01**: the first scene: the lighthouse island, the ships and a flat sea
+
+<img src="pictures_videos/evolution_of_the_game/version1.01.png" width="800">
+
+**Version 1.02**: a night sky and animated waves
+
+<img src="pictures_videos/evolution_of_the_game/version1.02.png" width="800">
+
+**Version 1.03**: fog, on and off
+
+<img src="pictures_videos/evolution_of_the_game/version1.03_fog_on.png" width="800">
+<img src="pictures_videos/evolution_of_the_game/version1.03fog_off.png" width="800">
+
+**Version 1.04**: shadows
+
+<img src="pictures_videos/evolution_of_the_game/version1.04_shadows.png" width="800">
+
+**Version 1.05**: the storm, with rain and lightning
+
+<img src="pictures_videos/evolution_of_the_game/version1.05storm.png" width="800">
+
+**Version 1.06**: the albatross
+
+<img src="pictures_videos/evolution_of_the_game/version1.06albatros.png" width="800">
+
+**Version 1.09**: the prologue and the mariner's ship in the storm
+
+<img src="pictures_videos/evolution_of_the_game/version1.09prologue.png" width="800">
+<img src="pictures_videos/evolution_of_the_game/version1.09.png" width="800">
+
+</details>
+
+
 ## Build from source (Linux)
 
 ```bash
