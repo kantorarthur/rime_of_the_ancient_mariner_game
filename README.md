@@ -22,14 +22,24 @@ I really loved Iron Maiden's song "Rime of the Ancient Mariner" (*Powerslave*, 1
 
 Rendering techniques: Blinn-Phong lighting with directional, point and spot lights, shadow mapping with PCF, Gerstner waves with Fresnel reflections, analytic height fog, a volumetric lighthouse beam, instanced rain, procedural lightning, skeletal animation and cinematic cameras.
 
-## Build (Linux)
+## Download and play (Linux)
 
-    sudo apt install build-essential cmake libglfw3-dev libglew-dev libglm-dev
-    cmake -S . -B build
-    cmake --build build -j
-    ./build/app
+1. Download `rime_of_the_ancient_mariner-linux.zip` from the [Releases](https://github.com/kantorarthur/rime_of_the_ancient_mariner_game/releases) page.
+2. Unzip it.
+3. In the unzipped folder, run `./rime_of_the_ancient_mariner.sh`.
 
-Run the program from the project root, since the paths to `assets/` are relative. Press Esc in the game for the menu and the list of controls.
+It needs a graphics card with OpenGL 4.1. Press Esc in the game for the menu and the list of controls.
+
+## Build from source (Linux)
+
+```bash
+sudo apt install build-essential cmake libglfw3-dev libglew-dev libglm-dev
+cmake -S . -B build
+cmake --build build -j
+./build/rime_of_the_ancient_mariner
+```
+
+`tools/make_release.sh` builds the game and packs it, with its assets and libraries, into `release/rime_of_the_ancient_mariner-linux.zip`.
 
 ## Project layout
 
@@ -39,6 +49,6 @@ Run the program from the project root, since the paths to `assets/` are relative
 - `src/game`: the story, the cinematic cameras, the ship controls and the pause menu
 - `external`: stb_image, stb_easy_font, tinyobjloader
 - `assets`: models, characters and their animations, skyboxes and shaders loaded at runtime
-- `tools`: Blender, ImageMagick and Python scripts that build the assets
+- `tools`: Blender, ImageMagick and Python scripts that build the assets, and the release script
 
 Asset sources and licenses are listed in `CREDITS.md`.

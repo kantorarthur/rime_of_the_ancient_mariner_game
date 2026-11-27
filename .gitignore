@@ -11,6 +11,8 @@ Claude outputs/
 
 # Build output
 build/
+build-release/
+release/
 out/
 bin/
 cmake-build-*/

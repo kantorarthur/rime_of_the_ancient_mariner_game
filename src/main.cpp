@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -290,8 +291,30 @@ void cleanup()
     myWindow.Delete();
 }
 
+void moveToAssetsFolder()
+{
+    if(std::filesystem::exists("assets/shaders"))
+        return;
+
+    std::error_code error;
+    std::filesystem::path executable = std::filesystem::read_symlink("/proc/self/exe", error);
+    if(error)
+        return;
+
+    for(std::filesystem::path folder = executable.parent_path(); folder != folder.root_path(); folder = folder.parent_path())
+    {
+        if(std::filesystem::exists(folder / "assets" / "shaders"))
+        {
+            std::filesystem::current_path(folder);
+            return;
+        }
+    }
+}
+
 int main()
 {
+    moveToAssetsFolder();
+
     try
     {
         initOpenGLWindow();
