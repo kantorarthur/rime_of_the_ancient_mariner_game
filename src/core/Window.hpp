@@ -11,6 +11,8 @@ namespace gps {
         int height;
     };
 
+    enum class WindowMode {Windowed, Borderless, Fullscreen};
+
     class Window
     {
     public:
@@ -20,10 +22,17 @@ namespace gps {
         GLFWwindow* getWindow();
         WindowDimensions getWindowDimensions();
         void setWindowDimensions(WindowDimensions dimensions);
+        void setMode(WindowMode newMode);
+        WindowMode getMode();
 
     private:
         WindowDimensions dimensions = {0, 0};
         GLFWwindow* window = nullptr;
+        WindowMode mode = WindowMode::Windowed;
+        int windowedX = 100;
+        int windowedY = 100;
+        int windowedWidth = 1024;
+        int windowedHeight = 768;
     };
 }
 

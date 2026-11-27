@@ -430,11 +430,11 @@ namespace gps {
         float scale = height / 600.0f;
         std::string hint;
         if(mode == ControlMode::Ship)
-            hint = "W/S  sails     A/D  helm     mouse  look around     C  free camera     Enter  next verse";
+            hint = "W/S  sails     A/D  helm     mouse  look around     C  free camera     Enter  next verse     Esc  menu";
         else
-            hint = "free camera     W/A/S/D  move     Space/Ctrl  up/down     C  back to the ship";
+            hint = "free camera     W/A/S/D  move     Space/Ctrl  up/down     C  back to the ship     Esc  menu";
         if(scene.isShipSinking())
-            hint = "free camera     W/A/S/D  move     Space/Ctrl  up/down     Shift  faster";
+            hint = "free camera     W/A/S/D  move     Space/Ctrl  up/down     Shift  faster     Esc  menu";
         text.drawTextCentered(hint, width * 0.5f, height - text.lineHeight(scale) * 1.8f, scale, HINT_COLOR);
 
         text.end();

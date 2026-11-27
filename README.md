@@ -37,7 +37,7 @@ Run the program from the project root, since the paths to `assets/` are relative
 | T | toggle weather (calm / storm) |
 | F | toggle fog |
 | L | lightning strike (during the storm) |
-| Esc | quit |
+| Esc | pause menu (resume, window mode, controls, exit) |
 
 ## Project layout
 

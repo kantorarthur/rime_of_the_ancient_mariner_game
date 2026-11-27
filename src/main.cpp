@@ -5,6 +5,7 @@
 #include "graphics/Model3D.hpp"
 #include "graphics/ViewMode.hpp"
 #include "game/Game.hpp"
+#include "game/PauseMenu.hpp"
 #include "graphics/TextRenderer.hpp"
 #include "scene/Camera.hpp"
 #include "scene/Scene.hpp"
@@ -42,6 +43,7 @@ float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
 
 gps::Scene scene;
+gps::PauseMenu pauseMenu;
 gps::Skybox skybox;
 int calmSky = 0;
 int stormSky = 0;
@@ -123,9 +125,6 @@ void updateWindowTitle()
 
 void handleKeyPresses()
 {
-    if(input.wasKeyPressed(GLFW_KEY_ESCAPE))
-        glfwSetWindowShouldClose(myWindow.getWindow(), GL_TRUE);
-
     if(input.wasKeyPressed(GLFW_KEY_TAB))
         input.setCursorCaptured(!input.isCursorCaptured());
 
@@ -267,7 +266,9 @@ void renderScene()
     scene.drawSouls(soulShader, view, projection, cameraPosition);
     scene.drawWeather(rainShader, boltShader, view, projection, cameraPosition);
 
-    game.drawOverlay(textRenderer, scene, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+    if(!pauseMenu.isOpen())
+        game.drawOverlay(textRenderer, scene, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+    pauseMenu.draw(textRenderer, myWindow, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
 }
 
 void cleanup()
@@ -309,9 +310,16 @@ int main()
             deltaTime = 0.1f;
 
         handleResize();
-        game.update(deltaTime, input, myCamera, scene);
-        handleKeyPresses();
-        scene.update(deltaTime, myCamera.getPosition(), myCamera.getFrontDirection());
+        bool wasPaused = pauseMenu.isOpen();
+        pauseMenu.update(input, myWindow);
+        if(pauseMenu.wantsToQuit())
+            glfwSetWindowShouldClose(myWindow.getWindow(), GL_TRUE);
+        if(!wasPaused && !pauseMenu.isOpen())
+        {
+            game.update(deltaTime, input, myCamera, scene);
+            handleKeyPresses();
+            scene.update(deltaTime, myCamera.getPosition(), myCamera.getFrontDirection());
+        }
 
         renderScene();
         glfwSwapBuffers(myWindow.getWindow());
