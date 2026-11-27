@@ -1,3 +1,5 @@
+<img src="pictures_videos/scenes_from_game/01_storm_ship_and_lighthouse.jpg" width="800">
+
 # The Rime of the Ancient Mariner
 
 > *Oh! dream of joy! is this indeed*
