@@ -59,6 +59,7 @@ namespace gps {
     const float GHOST_APPROACH_TIME = 26.0f;
     const float GHOST_LEAVE_TIME = 7.0f;
     const float GHOST_DISTANCE = 40.0f;
+    const float GHOST_LIFT = 1.1f;
     const float SEAT_HEIGHT = 0.464f;
     const float DICE_HALF_SIZE = 0.035f;
     const float DICE_FLIGHT_TIME = 0.8f;
@@ -68,7 +69,12 @@ namespace gps {
     const float SINK_TIME = 9.0f;
     const glm::vec3 SUNK_OFFSET = glm::vec3(-14.0f, -34.0f, 24.0f);
     const float SWIM_DEPTH = -0.15f;
-    const float BOAT_SPEED = 3.2f;
+    const float BOAT_SPEED = 4.0f;
+    const float BOAT_DRAFT = 0.06f;
+    const float BOAT_HARBOUR_RADIUS = 44.0f;
+    const float BOAT_ROUTE_RADIUS = 62.0f;
+    const float BOAT_ROUTE_STEP = 30.0f;
+    const float PIER_HALF_WIDTH = 1.4f;
     const float BOAT_FLOOR = 0.12f;
     const glm::mat4 CROSSBOW_GRIP = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.06f));
 
@@ -172,9 +178,10 @@ namespace gps {
         add(lantern, pierEnd + pierSide * 0.9f, 0.0f, 1.0f).emissiveStrength = 1.5f;
 
         glm::vec3 boatPosition = onCircle(PIER_ANGLE, 28.0f, -0.3f) - pierSide * 3.0f;
-        setFloating(add(boat, boatPosition, PIER_ANGLE + 180.0f, 1.0f), 0.3f, 4.4f, 1.8f);
+        setFloating(add(boat, boatPosition, PIER_ANGLE + 180.0f, 1.0f), BOAT_DRAFT, 4.4f, 1.8f);
         boatIndex = (int)objects.size() - 1;
         boatHome = boatPosition;
+        boatHarbour = onCircle(PIER_ANGLE, BOAT_HARBOUR_RADIUS, 0.0f) - pierSide * 3.0f;
 
         SceneObject& wreck = add(ship, glm::vec3(-46.0f, -5.5f, 18.0f), 65.0f, 1.0f);
         wreck.rotationDegrees.x = -7.0f;
@@ -387,7 +394,7 @@ namespace gps {
         glm::vec3 right = glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f));
 
         glm::vec3 alongside = shipPoint(glm::vec3(-GHOST_DISTANCE, 0.0f, 0.0f));
-        ghostEnd = glm::vec3(alongside.x, -SHIP_DRAFT, alongside.z);
+        ghostEnd = glm::vec3(alongside.x, GHOST_LIFT - SHIP_DRAFT, alongside.z);
         ghostStart = ghostEnd + forward * 380.0f - right * 140.0f;
         ghostYaw = objects[shipIndex].rotationDegrees.y;
 
@@ -434,14 +441,14 @@ namespace gps {
         if(ghostState == GhostState::Approaching)
         {
             float progress = glm::clamp(ghostTime / GHOST_APPROACH_TIME, 0.0f, 1.0f);
-            spectre.position = glm::mix(ghostStart, ghostEnd, glm::smoothstep(0.0f, 1.0f, progress));
+            spectre.position = glm::mix(ghostStart, ghostEnd, glm::smoothstep(0.0f, 1.0f, progress)) + glm::vec3(0.0f, bob, 0.0f);
             ghostFade = glm::smoothstep(0.0f, 0.35f, progress);
             if(progress >= 1.0f)
                 ghostState = GhostState::Alongside;
         }
         else if(ghostState == GhostState::Alongside)
         {
-            spectre.position = ghostEnd;
+            spectre.position = ghostEnd + glm::vec3(0.0f, bob, 0.0f);
             ghostFade = 1.0f;
         }
         else
@@ -816,6 +823,7 @@ namespace gps {
         glm::vec3 toBoat = objects[boatIndex].position - position;
         toBoat.y = 0.0f;
         boatTarget = position + glm::normalize(toBoat) * 2.6f;
+        boatRoute.clear();
         boatState = BoatState::Rowing;
     }
 
@@ -840,12 +848,44 @@ namespace gps {
         playAnimation(hermitCharacter, "bless", true, 0.5f);
     }
 
+    void Scene::planBoatRoute(glm::vec3 from, glm::vec3 to, bool leaving)
+    {
+        boatRoute.clear();
+        glm::vec3 start = leaving ? boatHarbour : from;
+        glm::vec3 end = leaving ? to : boatHarbour;
+        if(leaving)
+            boatRoute.push_back(boatHarbour);
+
+        float startAngle = glm::degrees(std::atan2(start.x, start.z));
+        float endAngle = glm::degrees(std::atan2(end.x, end.z));
+        float turn = std::remainder(endAngle - startAngle, 360.0f);
+        int steps = (int)std::ceil(std::fabs(turn) / BOAT_ROUTE_STEP);
+        if(std::fabs(turn) > 20.0f)
+        {
+            for(int i = 0; i <= steps; i++)
+                boatRoute.push_back(onCircle(startAngle + turn * i / steps, BOAT_ROUTE_RADIUS, 0.0f));
+        }
+
+        if(!leaving)
+            boatRoute.push_back(boatHarbour);
+    }
+
+    float Scene::distanceToPier(glm::vec3 point)
+    {
+        glm::vec2 start = glm::vec2(onCircle(PIER_ANGLE, 21.5f, 0.0f).x, onCircle(PIER_ANGLE, 21.5f, 0.0f).z);
+        glm::vec2 end = glm::vec2(onCircle(PIER_ANGLE, 21.5f + 3.0f * PIER_SECTION_LENGTH + 1.7f, 0.0f).x, onCircle(PIER_ANGLE, 21.5f + 3.0f * PIER_SECTION_LENGTH + 1.7f, 0.0f).z);
+        glm::vec2 position = glm::vec2(point.x, point.z);
+        float along = glm::clamp(glm::dot(position - start, end - start) / glm::dot(end - start, end - start), 0.0f, 1.0f);
+        return glm::length(position - glm::mix(start, end, along)) - PIER_HALF_WIDTH;
+    }
+
     void Scene::launchBoat()
     {
         glm::vec3 ship = shipPoint(glm::vec3(0.0f));
         glm::vec3 toHome = boatHome - ship;
         toHome.y = 0.0f;
         boatTarget = ship + glm::normalize(toHome) * 24.0f;
+        planBoatRoute(boatHome, boatTarget, true);
         boatState = BoatState::Rowing;
         for(int person : {pilotCharacter, pilotBoyCharacter, hermitCharacter})
             characters[person].visible = true;
@@ -867,9 +907,16 @@ namespace gps {
 
         SceneObject& rescue = objects[boatIndex];
         glm::vec3 target = boatState == BoatState::Rowing ? boatTarget : boatHome;
+        if(!boatRoute.empty())
+            target = boatRoute.front();
         glm::vec3 offset = glm::vec3(target.x - rescue.position.x, 0.0f, target.z - rescue.position.z);
         float distance = glm::length(offset);
-        if(distance < 0.3f)
+        if(!boatRoute.empty() && distance < 2.0f)
+        {
+            boatRoute.erase(boatRoute.begin());
+            return;
+        }
+        if(boatRoute.empty() && distance < 0.3f)
         {
             if(boatState == BoatState::Returning)
                 boatReturned = true;
@@ -878,11 +925,11 @@ namespace gps {
         }
 
         glm::vec3 direction = offset / distance;
-        float speed = BOAT_SPEED * glm::clamp(distance / 4.0f, 0.25f, 1.0f);
+        float speed = boatRoute.empty() ? BOAT_SPEED * glm::clamp(distance / 4.0f, 0.25f, 1.0f) : BOAT_SPEED;
         rescue.position += direction * speed * deltaTime;
         float heading = glm::degrees(std::atan2(direction.x, direction.z));
         float turn = std::remainder(heading - rescue.rotationDegrees.y, 360.0f);
-        rescue.rotationDegrees.y += glm::clamp(turn, -40.0f * deltaTime, 40.0f * deltaTime);
+        rescue.rotationDegrees.y += glm::clamp(turn, -60.0f * deltaTime, 60.0f * deltaTime);
     }
 
     bool Scene::isBoatAtMariner()
@@ -910,6 +957,7 @@ namespace gps {
     void Scene::boyLaughs()
     {
         playAnimation(pilotBoyCharacter, "yes", true, 0.3f);
+        planBoatRoute(objects[boatIndex].position, boatHome, false);
         boatState = BoatState::Returning;
     }
 

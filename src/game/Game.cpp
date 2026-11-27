@@ -27,7 +27,7 @@ namespace gps {
         {
             if(mode == ControlMode::Ship)
                 mode = ControlMode::FreeCamera;
-            else
+            else if(!scene.isShipSinking())
             {
                 mode = ControlMode::Ship;
                 chaseStarted = false;
@@ -72,6 +72,8 @@ namespace gps {
             return;
         }
         cinematic.update(deltaTime, camera, scene);
+        if(scene.isShipSinking())
+            mode = ControlMode::FreeCamera;
 
         if(mode == ControlMode::Ship)
         {
@@ -251,7 +253,7 @@ namespace gps {
         else if(event == "ashore")
         {
             scene.marinerAshore();
-            cinematic.play({{ShotFocus::Person, scene.getMarinerCharacter(), 8.0f}, {ShotFocus::Lighthouse, 0, 1000.0f}});
+            cinematic.play({{ShotFocus::Person, scene.getMarinerCharacter(), 8.0f}, {ShotFocus::Lighthouse, 0, 8.0f}});
         }
         else if(event == "alone")
         {
@@ -373,6 +375,8 @@ namespace gps {
             hint = "W/S  sails     A/D  helm     mouse  look around     C  free camera     Enter  next verse";
         else
             hint = "free camera     W/A/S/D  move     Space/Ctrl  up/down     C  back to the ship";
+        if(scene.isShipSinking())
+            hint = "free camera     W/A/S/D  move     Space/Ctrl  up/down     Shift  faster";
         text.drawTextCentered(hint, width * 0.5f, height - text.lineHeight(scale) * 1.8f, scale, HINT_COLOR);
 
         text.end();

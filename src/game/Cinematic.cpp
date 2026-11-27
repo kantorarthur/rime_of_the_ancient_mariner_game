@@ -50,6 +50,17 @@ namespace gps {
         if(shotTime == 0.0f)
             startShot(scene);
 
+        if(shots[current].focus == ShotFocus::Boat)
+        {
+            float right = scene.distanceToPier(scene.getBoatPoint(glm::vec3(3.8f, 0.0f, 4.6f)));
+            float left = scene.distanceToPier(scene.getBoatPoint(glm::vec3(-3.8f, 0.0f, 4.6f)));
+            float sideTarget = right >= left ? 1.0f : -1.0f;
+            if(shotTime == 0.0f)
+                boatSide = sideTarget;
+            float sideStep = 0.8f * deltaTime;
+            boatSide += glm::clamp(sideTarget - boatSide, -sideStep, sideStep);
+        }
+
         frame(shots[current], camera, scene);
 
         shotTime += deltaTime;
@@ -156,7 +167,7 @@ namespace gps {
         }
         else if(shot.focus == ShotFocus::Boat)
         {
-            eye = scene.getBoatPoint(glm::vec3(-3.5f, 2.6f, glm::mix(5.0f, 4.0f, progress)));
+            eye = scene.getBoatPoint(glm::vec3(boatSide * 3.8f, 3.4f, glm::mix(5.0f, 4.2f, progress)));
             target = scene.getBoatPoint(glm::vec3(0.0f, 0.9f, 0.0f));
         }
         else if(shot.focus == ShotFocus::Dice)

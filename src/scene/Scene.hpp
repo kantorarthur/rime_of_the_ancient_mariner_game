@@ -116,6 +116,7 @@ namespace gps {
         void marinerAshore();
         bool isBoatHome();
         bool isShipSinking();
+        float distanceToPier(glm::vec3 point);
         bool isBoatAtMariner();
         void marinerAboard();
         void pilotFit();
@@ -215,6 +216,8 @@ namespace gps {
         bool boatReturned = false;
         glm::vec3 boatHome = glm::vec3(0.0f);
         glm::vec3 boatTarget = glm::vec3(0.0f);
+        glm::vec3 boatHarbour = glm::vec3(0.0f);
+        std::vector<glm::vec3> boatRoute;
         int pilotCharacter = -1;
         int pilotBoyCharacter = -1;
         int hermitCharacter = -1;
@@ -268,6 +271,7 @@ namespace gps {
         void turnCharacters(float deltaTime);
         void placeGhostShip();
         void updateSinking(float deltaTime);
+        void planBoatRoute(glm::vec3 from, glm::vec3 to, bool leaving);
         void updateBoat(float deltaTime);
         void updateSwimming();
         void updateGhostShip(float deltaTime);

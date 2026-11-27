@@ -34,6 +34,7 @@ namespace gps {
         float shotTime = 0.0f;
         float barAmount = 0.0f;
         glm::vec3 anchor = glm::vec3(0.0f);
+        float boatSide = 1.0f;
 
         void frame(Shot& shot, gps::Camera& camera, gps::Scene& scene);
         void framePerson(int character, float progress, glm::vec3& eye, glm::vec3& target, gps::Scene& scene);
