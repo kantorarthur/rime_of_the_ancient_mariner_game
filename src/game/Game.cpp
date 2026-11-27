@@ -34,8 +34,16 @@ namespace gps {
             }
         }
 
+        if(input.wasKeyPressed(GLFW_KEY_ENTER))
+            story.skipCaption();
+
         story.update(deltaTime, glm::length(glm::vec2(scene.getShipPosition().x, scene.getShipPosition().z)));
         reactToStory(scene);
+        for(std::string& event : story.takeEvents())
+            handleEvent(event, scene);
+
+        if(story.getChapter() == Chapter::GhostApproach && scene.isGhostShipAlongside())
+            story.ghostArrived();
 
         if(story.getChapter() == Chapter::Crossbow && input.wasKeyPressed(GLFW_KEY_X) && scene.raiseCrossbow())
             filmShooting(scene);
@@ -97,6 +105,70 @@ namespace gps {
         }
 
         lastChapter = chapter;
+    }
+
+    void Game::handleEvent(std::string event, gps::Scene& scene)
+    {
+        int death = scene.getDeathCharacter();
+        int life = scene.getLifeInDeathCharacter();
+
+        if(event == "deathfires")
+        {
+            scene.lightDeathFires();
+            cinematic.play({{ShotFocus::ShipWide, 0, 9.0f}});
+        }
+        else if(event == "neck")
+        {
+            scene.hangAlbatross();
+            cinematic.play({{ShotFocus::Mariner, 0, 6.0f}});
+        }
+        else if(event == "sail")
+        {
+            scene.marinerBitesArm();
+            scene.summonGhostShip();
+            cinematic.play({{ShotFocus::Mariner, 0, 4.0f}, {ShotFocus::GhostShip, 0, 7.0f}});
+        }
+        else if(event == "twain")
+            cinematic.play({{ShotFocus::GhostShip, 0, 4.0f}, {ShotFocus::GhostDeck, 0, 4.0f}, {ShotFocus::Person, death, 3.0f}});
+        else if(event == "lifeface")
+            cinematic.play({{ShotFocus::Person, life, 11.0f}});
+        else if(event == "dice")
+        {
+            scene.throwDice();
+            cinematic.play({{ShotFocus::Dice, 0, 7.0f}});
+        }
+        else if(event == "won")
+        {
+            scene.lifeInDeathWins();
+            cinematic.play({{ShotFocus::Person, life, 4.0f}, {ShotFocus::GhostDeck, 0, 4.0f}});
+        }
+        else if(event == "ghostleaves")
+        {
+            scene.dismissGhostShip();
+            cinematic.play({{ShotFocus::GhostShip, 0, 8.0f}});
+        }
+        else if(event == "cursed")
+        {
+            scene.crewCurse();
+            std::vector<Shot> shots;
+            for(int i = 0; i < (int)scene.getCrewCharacters().size(); i++)
+                shots.push_back({ShotFocus::Crew, i, 2.5f});
+            cinematic.play(shots);
+        }
+        else if(event == "deaths")
+        {
+            scene.killCrew(2.6f);
+            std::vector<Shot> shots;
+            for(int i = 0; i < (int)scene.getCrewCharacters().size(); i++)
+                shots.push_back({ShotFocus::CrewFall, i, 2.6f});
+            shots.push_back({ShotFocus::Mariner, 0, 4.0f});
+            cinematic.play(shots);
+        }
+        else if(event == "alone")
+        {
+            scene.marinerDespairs();
+            cinematic.play({{ShotFocus::ShipWide, 0, 11.0f}});
+        }
     }
 
     void Game::filmShooting(gps::Scene& scene)
@@ -207,7 +279,7 @@ namespace gps {
         float scale = height / 600.0f;
         std::string hint;
         if(mode == ControlMode::Ship)
-            hint = "W/S  sails     A/D  helm     mouse  look around     C  free camera";
+            hint = "W/S  sails     A/D  helm     mouse  look around     C  free camera     Enter  next verse";
         else
             hint = "free camera     W/A/S/D  move     Space/Ctrl  up/down     C  back to the ship";
         text.drawTextCentered(hint, width * 0.5f, height - text.lineHeight(scale) * 1.8f, scale, HINT_COLOR);

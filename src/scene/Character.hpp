@@ -7,7 +7,19 @@
 
 #include <glm/glm.hpp>
 
+#include <string>
+#include <vector>
+
 namespace gps {
+
+    struct Prop
+    {
+        gps::Model3D* model = nullptr;
+        int bone = -1;
+        glm::mat4 offset = glm::mat4(1.0f);
+        float wingFlap = 0.0f;
+        bool visible = false;
+    };
 
     struct Character
     {
@@ -19,11 +31,8 @@ namespace gps {
         float scale = 1.0f;
         int parentObject = -1;
         bool visible = true;
-
-        gps::Model3D* prop = nullptr;
-        int propBone = -1;
-        glm::mat4 propOffset = glm::mat4(1.0f);
-        bool propVisible = false;
+        std::string nextClip;
+        std::vector<Prop> props;
     };
 }
 

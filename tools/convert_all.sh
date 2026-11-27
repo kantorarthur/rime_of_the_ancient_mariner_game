@@ -66,6 +66,7 @@ blender -b --disable-autoexec --factory-startup -P "$TOOLS/make_albatross.py" --
 
 python3 "$TOOLS/write_materials.py" "$OUT"
 python3 "$TOOLS/make_crossbow.py" "$OUT/crossbow"
+python3 "$TOOLS/make_dice.py" "$OUT/dice"
 
 SKY="$ROOT/assets/skybox"
 sky()

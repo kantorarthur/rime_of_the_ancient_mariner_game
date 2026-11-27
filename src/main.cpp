@@ -56,6 +56,8 @@ gps::Shader boltShader;
 gps::Shader textShader;
 gps::Shader skinnedShader;
 gps::Shader skinnedDepthShader;
+gps::Shader ghostShader;
+gps::Shader soulShader;
 
 gps::Game game;
 gps::TextRenderer textRenderer;
@@ -208,6 +210,8 @@ void initShaders()
     textShader.loadShader("assets/shaders/text.vert", "assets/shaders/text.frag");
     skinnedShader.loadShader("assets/shaders/skinned.vert", "assets/shaders/basic.frag");
     skinnedDepthShader.loadShader("assets/shaders/skinned_shadow.vert", "assets/shaders/shadow.frag");
+    ghostShader.loadShader("assets/shaders/basic.vert", "assets/shaders/ghost.frag");
+    soulShader.loadShader("assets/shaders/soul.vert", "assets/shaders/soul.frag");
 }
 
 void initUniforms()
@@ -255,7 +259,9 @@ void renderScene()
         skybox.select(stormSky);
     scene.uploadEnvironment(skyboxShader, cameraPosition);
     skybox.draw(skyboxShader, view, projection, 1.0f);
+    scene.drawGhosts(ghostShader, view, projection, cameraPosition);
     scene.drawBeam(beamShader, view, projection, cameraPosition);
+    scene.drawSouls(soulShader, view, projection, cameraPosition);
     scene.drawWeather(rainShader, boltShader, view, projection, cameraPosition);
 
     game.drawOverlay(textRenderer, scene, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);

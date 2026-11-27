@@ -23,16 +23,50 @@ namespace gps {
         say({"The ship was cheered, the harbour cleared,", "Merrily did we drop", "Below the kirk, below the hill,", "Below the lighthouse top."}, 8.0f, false);
     }
 
-    void Story::say(std::vector<std::string> lines, float duration, bool large)
+    void Story::say(std::vector<std::string> lines, float duration, bool large, std::string event)
     {
-        captions.push_back({lines, duration, large});
+        Caption caption = {lines, duration, large};
+        caption.event = event;
+        captions.push_back(caption);
     }
 
-    void Story::shout(std::string line, float duration)
+    void Story::shout(std::string line, float duration, std::string event)
     {
         Caption caption = {{line}, duration, false};
         caption.speech = true;
+        caption.event = event;
         captions.push_back(caption);
+    }
+
+    std::vector<std::string> Story::takeEvents()
+    {
+        std::vector<std::string> taken = events;
+        events.clear();
+        return taken;
+    }
+
+    void Story::skipCaption()
+    {
+        if(isShowingCaption() && captionTime < captions[current].duration - 1.2f)
+            captionTime = captions[current].duration - 1.2f;
+    }
+
+    void Story::ghostArrived()
+    {
+        if(chapter != Chapter::GhostApproach)
+            return;
+
+        enter(Chapter::Dice);
+        say({"Are those her ribs through which the Sun", "Did peer, as through a grate?", "And is that Woman all her crew?", "Is that a DEATH? and are there two?", "Is DEATH that woman's mate?"}, 11.0f, false, "twain");
+        say({"Her lips were red, her looks were free,", "Her locks were yellow as gold:", "Her skin was as white as leprosy,", "The Night-mare LIFE-IN-DEATH was she,", "Who thicks man's blood with cold."}, 11.0f, false, "lifeface");
+        say({"The naked hulk alongside came,", "And the twain were casting dice;"}, 7.0f, false, "dice");
+        shout("'The game is done! I've won! I've won!'", 4.0f, "won");
+        say({"Quoth she, and whistles thrice."}, 4.0f, false);
+        say({"The Sun's rim dips; the stars rush out:", "At one stride comes the dark;", "With far-heard whisper, o'er the sea,", "Off shot the spectre-bark."}, 10.0f, false, "ghostleaves");
+        say({"One after one, by the star-dogged Moon,", "Too quick for groan or sigh,", "Each turned his face with a ghastly pang,", "And cursed me with his eye."}, 10.0f, false, "cursed");
+        say({"Four times fifty living men,", "(And I heard nor sigh nor groan)", "With heavy thump, a lifeless lump,", "They dropped down one by one."}, 11.0f, false, "deaths");
+        say({"The souls did from their bodies fly,-", "They fled to bliss or woe!", "And every soul, it passed me by,", "Like the whizz of my cross-bow!"}, 10.0f, false);
+        say({"Alone, alone, all, all alone,", "Alone on a wide wide sea!", "And never a saint took pity on", "My soul in agony."}, 11.0f, false, "alone");
     }
 
     void Story::enter(Chapter next)
@@ -49,6 +83,7 @@ namespace gps {
         enter(Chapter::Shot);
         captions.erase(captions.begin() + current, captions.end());
         captionTime = 0.0f;
+        captionStarted = false;
         say({"'God save thee, ancient Mariner!", "From the fiends, that plague thee thus!-", "Why look'st thou so?' - With my cross-bow", "I shot the ALBATROSS."}, 8.0f, false);
         shout("WHAT HAVE YOU DONE?", 4.0f);
         say({"And I had done a hellish thing,", "And it would work 'em woe:", "For all averred, I had killed the bird", "That made the breeze to blow."}, 9.0f, false);
@@ -59,6 +94,13 @@ namespace gps {
     {
         chapterTime += deltaTime;
 
+        if(current < captions.size() && !captionStarted)
+        {
+            captionStarted = true;
+            if(!captions[current].event.empty())
+                events.push_back(captions[current].event);
+        }
+
         if(current < captions.size())
         {
             captionTime += deltaTime;
@@ -66,6 +108,7 @@ namespace gps {
             {
                 current++;
                 captionTime = 0.0f;
+                captionStarted = false;
             }
         }
 
@@ -94,7 +137,16 @@ namespace gps {
             say({"Down dropt the breeze, the sails dropt down,", "'Twas sad as sad could be;", "And we did speak only to break", "The silence of the sea!"}, 10.0f, false);
             say({"Day after day, day after day,", "We stuck, nor breath nor motion;", "As idle as a painted ship", "Upon a painted ocean."}, 10.0f, false);
             say({"Water, water, every where,", "And all the boards did shrink;", "Water, water, every where,", "Nor any drop to drink."}, 10.0f, false);
+            say({"The very deep did rot: O Christ!", "That ever this should be!", "Yea, slimy things did crawl with legs", "Upon the slimy sea."}, 10.0f, false, "deathfires");
+            say({"About, about, in reel and rout", "The death-fires danced at night;", "The water, like a witch's oils,", "Burnt green, and blue and white."}, 10.0f, false);
+            say({"Ah! well a-day! what evil looks", "Had I from old and young!", "Instead of the cross, the Albatross", "About my neck was hung."}, 10.0f, false, "neck");
+            say({"With throats unslaked, with black lips baked,", "We could nor laugh nor wail;", "Through utter drought all dumb we stood!", "I bit my arm, I sucked the blood,", "And cried, A sail! a sail!"}, 11.0f, false, "sail");
+            say({"See! see! (I cried) she tacks no more!", "Hither to work us weal;", "Without a breeze, without a tide,", "She steadies with upright keel!"}, 10.0f, false);
         }
+        else if(chapter == Chapter::Becalmed && !isShowingCaption())
+            enter(Chapter::GhostApproach);
+        else if(chapter == Chapter::Dice && !isShowingCaption())
+            enter(Chapter::Alone);
     }
 
     bool Story::isShowingCaption()

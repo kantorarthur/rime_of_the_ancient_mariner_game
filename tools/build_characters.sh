@@ -30,6 +30,10 @@ texture "$BASE/Base Characters/Textures/T_Superhero_Male_Ligh.png" skin_head_mal
 texture "$BASE/Base Characters/Textures/T_Superhero_Female_Light_BaseColor.png" skin_head_female
 texture "$OUTFITS/Exports/glTF (Godot-Unreal)/Outfits/T_Regular_Male_Dark_BaseColor.png" skin_hands_male
 convert "$BASE/Base Characters/Godot - UE/T_Eye_Brown.png" -resize 256x256 -quality 90 "$TEXTURES/eyes.jpg"
+convert "$TEXTURES/ranger_1.jpg" -modulate 35,10 -quality 90 "$TEXTURES/ranger_dark.jpg"
+convert "$TEXTURES/skin_head_male.jpg" -modulate 80,5 -quality 90 "$TEXTURES/skin_grey_male.jpg"
+convert "$TEXTURES/skin_hands_male.jpg" -modulate 80,5 -quality 90 "$TEXTURES/skin_grey_hands.jpg"
+convert "$TEXTURES/skin_head_female.jpg" -modulate 135,12 -quality 90 "$TEXTURES/skin_pale_female.jpg"
 hair '#3a2616' hair_brown
 hair '#1c1714' hair_black
 hair '#d8d4cc' hair_white

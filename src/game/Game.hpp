@@ -43,6 +43,7 @@ namespace gps {
         void updateFreeCamera(float deltaTime, gps::Input& input, gps::Camera& camera);
         void reactToStory(gps::Scene& scene);
         void filmShooting(gps::Scene& scene);
+        void handleEvent(std::string event, gps::Scene& scene);
         void drawShipStatus(gps::TextRenderer& text, gps::Scene& scene, int width, int height);
     };
 }

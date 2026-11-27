@@ -84,13 +84,29 @@ namespace gps {
             target = bird;
         }
         else if(shot.focus == ShotFocus::Crew)
+            framePerson(scene.getCrewCharacters()[shot.index], progress, eye, target, scene);
+        else if(shot.focus == ShotFocus::CrewFall)
         {
             int sailor = scene.getCrewCharacters()[shot.index];
-            glm::vec3 head = scene.characterHead(sailor);
-            glm::vec3 front = scene.characterPoint(sailor, glm::vec3(0.0f, 0.0f, 1.0f)) - scene.characterPoint(sailor, glm::vec3(0.0f));
-            glm::vec3 side = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
-            eye = head + front * glm::mix(2.1f, 1.6f, progress) + side * 0.6f + glm::vec3(0.0f, 0.15f, 0.0f);
-            target = head + glm::vec3(0.0f, -0.25f, 0.0f);
+            eye = scene.characterPoint(sailor, glm::vec3(1.2f, 2.4f, 2.8f));
+            target = glm::mix(scene.characterHead(sailor), scene.characterPoint(sailor, glm::vec3(0.0f, 0.6f, -0.4f)), 0.5f);
+        }
+        else if(shot.focus == ShotFocus::Person)
+            framePerson(shot.index, progress, eye, target, scene);
+        else if(shot.focus == ShotFocus::GhostShip)
+        {
+            eye = scene.shipPoint(glm::vec3(-3.5f, 9.5f, -9.0f));
+            target = scene.getGhostShipPoint(glm::vec3(0.0f, 9.0f, 0.0f));
+        }
+        else if(shot.focus == ShotFocus::GhostDeck)
+        {
+            eye = scene.getGhostShipPoint(glm::vec3(glm::mix(-7.0f, -5.5f, progress), 8.0f, 5.5f));
+            target = scene.getGhostShipPoint(glm::vec3(0.0f, 5.3f, 0.0f));
+        }
+        else if(shot.focus == ShotFocus::Dice)
+        {
+            eye = scene.getGhostShipPoint(glm::vec3(-0.5f, 6.3f, glm::mix(1.6f, 1.2f, progress)));
+            target = scene.getGhostShipPoint(glm::vec3(0.1f, 5.1f, 0.0f));
         }
         else if(shot.focus == ShotFocus::ShipBow)
         {
@@ -104,6 +120,15 @@ namespace gps {
         }
 
         camera.lookAt(eye, target);
+    }
+
+    void Cinematic::framePerson(int character, float progress, glm::vec3& eye, glm::vec3& target, gps::Scene& scene)
+    {
+        glm::vec3 head = scene.characterHead(character);
+        glm::vec3 front = scene.characterPoint(character, glm::vec3(0.0f, 0.0f, 1.0f)) - scene.characterPoint(character, glm::vec3(0.0f));
+        glm::vec3 side = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
+        eye = head + front * glm::mix(2.1f, 1.6f, progress) + side * 0.6f + glm::vec3(0.0f, 0.15f, 0.0f);
+        target = head + glm::vec3(0.0f, -0.25f, 0.0f);
     }
 
     void Cinematic::drawBars(gps::TextRenderer& text, int width, int height)

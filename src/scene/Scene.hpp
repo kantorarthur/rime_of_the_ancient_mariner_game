@@ -24,7 +24,15 @@
 namespace gps {
 
     enum class Weather {Calm, Storm};
-    enum class AlbatrossState {CirclingLighthouse, FollowingShip, Falling, Floating};
+    enum class AlbatrossState {CirclingLighthouse, FollowingShip, Falling, Floating, Hung};
+    enum class GhostState {Hidden, Approaching, Alongside, Leaving};
+
+    struct Soul
+    {
+        glm::vec3 position;
+        glm::vec3 velocity;
+        float age;
+    };
 
     struct SceneObject
     {
@@ -38,6 +46,8 @@ namespace gps {
         float floatWidth = 0.0f;
         float wingFlap = 0.0f;
         bool visible = true;
+        bool ghost = false;
+        int parent = -1;
 
         glm::mat4 getModelMatrix();
     };
@@ -57,6 +67,8 @@ namespace gps {
         void uploadEnvironment(gps::Shader shader, glm::vec3 cameraPosition);
         void drawWater(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition, GLuint skyboxTexture);
         void drawBeam(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
+        void drawGhosts(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
+        void drawSouls(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
         void drawWeather(gps::Shader rainShader, gps::Shader boltShader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition);
 
         void toggleWeather();
@@ -72,6 +84,22 @@ namespace gps {
         bool isAlbatrossShot();
         void crewMourn();
         void setSailingWind(float strength);
+
+        void lightDeathFires();
+        void hangAlbatross();
+        void marinerBitesArm();
+        void summonGhostShip();
+        bool isGhostShipAlongside();
+        void dismissGhostShip();
+        void throwDice();
+        void lifeInDeathWins();
+        void crewCurse();
+        void killCrew(float interval);
+        void marinerDespairs();
+        int getDeathCharacter();
+        int getLifeInDeathCharacter();
+        glm::vec3 getGhostShipPoint(glm::vec3 localPoint);
+        glm::vec3 getDicePosition();
 
         glm::vec3 characterPoint(int character, glm::vec3 localOffset);
         glm::vec3 characterHead(int character);
@@ -100,6 +128,7 @@ namespace gps {
         gps::Model3D crate;
         gps::Model3D albatross;
         gps::Model3D crossbow;
+        gps::Model3D dice;
         gps::Model3D rocks[3];
 
         std::vector<SceneObject> objects;
@@ -139,6 +168,29 @@ namespace gps {
         float sailingWind = 1.0f;
         float crossbowTimer = -1.0f;
 
+        int ghostIndex = -1;
+        int ghostLight = -1;
+        GhostState ghostState = GhostState::Hidden;
+        float ghostTime = 0.0f;
+        float ghostFade = 0.0f;
+        glm::vec3 ghostStart = glm::vec3(0.0f);
+        glm::vec3 ghostEnd = glm::vec3(0.0f);
+        float ghostYaw = 0.0f;
+        int deathCharacter = -1;
+        int lifeInDeathCharacter = -1;
+        int diceIndex[2] = {-1, -1};
+        float diceTime = -1.0f;
+
+        float curse = 0.0f;
+        float curseTarget = 0.0f;
+
+        float crewDeathInterval = 0.0f;
+        float crewDeathTimer = -1.0f;
+        int crewDeaths = 0;
+        std::vector<Soul> souls;
+        GLuint soulVao = 0;
+        GLuint soulVbo = 0;
+
         int albatrossIndex = -1;
         AlbatrossState albatrossState = AlbatrossState::CirclingLighthouse;
         float albatrossFollow = 0.0f;
@@ -169,6 +221,13 @@ namespace gps {
         void dropAlbatross(float deltaTime);
         void updateCrossbow(float deltaTime);
         void turnCharacters(float deltaTime);
+        void placeGhostShip();
+        void updateGhostShip(float deltaTime);
+        void updateDice(float deltaTime);
+        void updateCrewDeaths(float deltaTime);
+        void updateSouls(float deltaTime);
+        void drawProps(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc);
+        glm::mat4 objectMatrix(SceneObject& object);
         float yawTowards(Character& character, glm::vec3 localTarget);
         glm::vec3 toShipLocal(glm::vec3 worldPoint);
         void drawDepth(gps::Shader depthShader, glm::mat4 lightSpace, bool includeLighthouse);

@@ -52,10 +52,22 @@ namespace gps {
     const float CHARACTER_TURN_SPEED = 150.0f;
     const float CROSSBOW_AIM_TIME = 1.0f;
     const float CROSSBOW_LOWER_TIME = 3.5f;
+    const glm::mat4 HUNG_ALBATROSS = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.24f, -0.02f)), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0.38f));
+    const float GHOST_DECK = 4.65f;
+    const glm::vec3 GHOST_LIGHT = glm::vec3(0.0f, 7.8f, 0.6f);
+    const glm::vec3 GHOST_LIGHT_COLOR = glm::vec3(0.55f, 0.8f, 0.9f) * 2.2f;
+    const float GHOST_APPROACH_TIME = 26.0f;
+    const float GHOST_LEAVE_TIME = 7.0f;
+    const float GHOST_DISTANCE = 40.0f;
+    const float SEAT_HEIGHT = 0.464f;
+    const float DICE_HALF_SIZE = 0.035f;
+    const float DICE_FLIGHT_TIME = 0.8f;
+    const float SOUL_DELAY = 1.3f;
+    const float SOUL_LIFETIME = 6.0f;
     const glm::mat4 CROSSBOW_GRIP = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.06f));
 
     const std::string CHARACTER_FOLDER = "assets/characters/";
-    const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4"};
+    const char* CHARACTER_MESHES[] = {"mariner", "sailor_1", "sailor_2", "sailor_3", "sailor_4", "death", "life_in_death"};
     const char* ANIMATION_CLIPS[] = {"idle", "talk", "helm", "death", "sit", "sit_talk", "aim", "shoot", "bless", "bless_hold", "grieve", "kneel", "dance", "walk", "walk_formal", "swim", "hit", "interact", "haul", "rail", "rail_call", "shake_head", "fold_arms", "lantern", "rise", "zombie", "zombie_walk", "yes", "throw", "consume"};
 
     const int RAIN_DROP_COUNT = 12000;
@@ -73,6 +85,13 @@ namespace gps {
         matrix = glm::rotate(matrix, glm::radians(rotationDegrees.z), glm::vec3(0.0f, 0.0f, 1.0f));
         matrix = glm::scale(matrix, glm::vec3(scale));
         return matrix;
+    }
+
+    glm::mat4 Scene::objectMatrix(SceneObject& object)
+    {
+        if(object.parent >= 0)
+            return objectMatrix(objects[object.parent]) * object.getModelMatrix();
+        return object.getModelMatrix();
     }
 
     void Scene::load()
@@ -95,6 +114,14 @@ namespace gps {
         rain.init(RAIN_DROP_COUNT);
         lightning.init();
         lightBeam.init(BEAM_SHAFT_LENGTH, BEAM_SHAFT_RADIUS, BEAM_SHAFT_SPREAD, 48);
+
+        glGenVertexArrays(1, &soulVao);
+        glGenBuffers(1, &soulVbo);
+        glBindVertexArray(soulVao);
+        glBindBuffer(GL_ARRAY_BUFFER, soulVbo);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)0);
+        glBindVertexArray(0);
         moonShadowMap.init(MOON_SHADOW_SIZE);
         beamShadowMap.init(BEAM_SHADOW_SIZE);
     }
@@ -112,6 +139,7 @@ namespace gps {
         crate.LoadModel("assets/models/crate/crate.obj");
         albatross.LoadModel("assets/models/albatross/albatross.obj");
         crossbow.LoadModel("assets/models/crossbow/crossbow.obj");
+        dice.LoadModel("assets/models/dice/dice.obj");
 
         for(int i = 0; i < 3; i++)
             rocks[i].LoadModel("assets/models/rocks/rock_" + std::to_string(i + 1) + ".obj");
@@ -148,6 +176,8 @@ namespace gps {
         shipController.reset(SHIP_START_POSITION, SHIP_START_HEADING);
         setFloating(add(ship, glm::vec3(SHIP_START_POSITION.x, 0.0f, SHIP_START_POSITION.y), SHIP_START_HEADING + SHIP_MODEL_YAW, 1.0f), SHIP_DRAFT, SHIP_LENGTH, SHIP_WIDTH);
         shipIndex = (int)objects.size() - 1;
+
+        placeGhostShip();
 
         setFloating(add(crate, glm::vec3(-26.0f, 0.0f, 22.0f), 25.0f, 1.0f), 0.22f, 1.17f, 0.53f);
         setFloating(add(crate, glm::vec3(-16.0f, 0.0f, 40.0f), 70.0f, 1.0f), 0.22f, 1.17f, 0.53f);
@@ -203,9 +233,18 @@ namespace gps {
         marinerCharacter = addCharacter("mariner", glm::vec3(0.0f, 6.5f, -7.6f), 0.0f, shipIndex);
         playAnimation(marinerCharacter, "helm", true, 0.0f);
         Character& mariner = characters[marinerCharacter];
-        mariner.prop = &crossbow;
-        mariner.propBone = mariner.mesh->findBone("hand_r");
-        mariner.propOffset = CROSSBOW_GRIP;
+        Prop bow;
+        bow.model = &crossbow;
+        bow.bone = mariner.mesh->findBone("hand_r");
+        bow.offset = CROSSBOW_GRIP;
+        mariner.props.push_back(bow);
+
+        Prop deadBird;
+        deadBird.model = &albatross;
+        deadBird.bone = mariner.mesh->findBone("spine_03");
+        deadBird.offset = HUNG_ALBATROSS;
+        deadBird.wingFlap = glm::radians(-70.0f);
+        mariner.props.push_back(deadBird);
 
         crewCharacters.push_back(addCharacter("sailor_1", glm::vec3(2.0f, 4.65f, 1.0f), 90.0f, shipIndex));
         crewCharacters.push_back(addCharacter("sailor_2", glm::vec3(-2.0f, 4.65f, -1.0f), -90.0f, shipIndex));
@@ -215,13 +254,21 @@ namespace gps {
         const char* work[] = {"rail", "rail_call", "fold_arms", "haul"};
         for(size_t i = 0; i < crewCharacters.size(); i++)
             playAnimation(crewCharacters[i], work[i], true, 0.0f);
+
+        deathCharacter = addCharacter("death", glm::vec3(-0.95f, GHOST_DECK, 0.0f), 90.0f, ghostIndex);
+        playAnimation(deathCharacter, "sit", true, 0.0f);
+        characters[deathCharacter].visible = false;
+
+        lifeInDeathCharacter = addCharacter("life_in_death", glm::vec3(0.95f, GHOST_DECK, 0.0f), -90.0f, ghostIndex);
+        playAnimation(lifeInDeathCharacter, "sit_talk", true, 0.0f);
+        characters[lifeInDeathCharacter].visible = false;
     }
 
     glm::mat4 Scene::characterMatrix(Character& character)
     {
         glm::mat4 parent = glm::mat4(1.0f);
         if(character.parentObject >= 0)
-            parent = objects[character.parentObject].getModelMatrix();
+            parent = objectMatrix(objects[character.parentObject]);
         glm::mat4 local = glm::translate(glm::mat4(1.0f), character.localPosition);
         local = glm::rotate(local, glm::radians(character.localYaw), glm::vec3(0.0f, 1.0f, 0.0f));
         local = glm::scale(local, glm::vec3(character.scale));
@@ -260,6 +307,357 @@ namespace gps {
             glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(characterMatrix(character)));
             character.mesh->draw(shader, character.animator.getPalette());
         }
+    }
+
+    void Scene::placeGhostShip()
+    {
+        SceneObject& spectre = add(ship, glm::vec3(0.0f, -SHIP_DRAFT, 0.0f), 0.0f, 1.0f);
+        spectre.ghost = true;
+        spectre.visible = false;
+        ghostIndex = (int)objects.size() - 1;
+
+        glm::vec3 furniture[3] = {glm::vec3(-1.23f, GHOST_DECK, 0.0f), glm::vec3(1.23f, GHOST_DECK, 0.0f), glm::vec3(0.0f, GHOST_DECK, 0.0f)};
+        float furnitureYaw[3] = {90.0f, 90.0f, 0.0f};
+        for(int i = 0; i < 3; i++)
+        {
+            SceneObject& seat = add(crate, furniture[i], furnitureYaw[i], 1.0f);
+            seat.parent = ghostIndex;
+            seat.ghost = true;
+            seat.visible = false;
+        }
+
+        for(int i = 0; i < 2; i++)
+        {
+            SceneObject& die = add(dice, glm::vec3(0.0f, GHOST_DECK + SEAT_HEIGHT + DICE_HALF_SIZE, 0.0f), 0.0f, 1.0f);
+            die.parent = ghostIndex;
+            die.visible = false;
+            diceIndex[i] = (int)objects.size() - 1;
+        }
+    }
+
+    void Scene::lightDeathFires()
+    {
+        curseTarget = 1.0f;
+    }
+
+    void Scene::hangAlbatross()
+    {
+        albatrossState = AlbatrossState::Hung;
+        objects[albatrossIndex].visible = false;
+        characters[marinerCharacter].props[1].visible = true;
+    }
+
+    void Scene::marinerBitesArm()
+    {
+        playAnimation(marinerCharacter, "consume", false, 0.4f);
+        characters[marinerCharacter].nextClip = "helm";
+        for(int sailor : crewCharacters)
+            playAnimation(sailor, "rail_call", true, 0.6f);
+    }
+
+    void Scene::summonGhostShip()
+    {
+        if(ghostState != GhostState::Hidden)
+            return;
+
+        glm::vec3 forward = shipPoint(glm::vec3(0.0f, 0.0f, 1.0f)) - shipPoint(glm::vec3(0.0f));
+        forward = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
+        glm::vec3 right = glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glm::vec3 alongside = shipPoint(glm::vec3(-GHOST_DISTANCE, 0.0f, 0.0f));
+        ghostEnd = glm::vec3(alongside.x, -SHIP_DRAFT, alongside.z);
+        ghostStart = ghostEnd + forward * 380.0f - right * 140.0f;
+        ghostYaw = objects[shipIndex].rotationDegrees.y;
+
+        ghostState = GhostState::Approaching;
+        ghostTime = 0.0f;
+        for(SceneObject& object : objects)
+        {
+            if(object.parent == ghostIndex && object.ghost)
+                object.visible = true;
+        }
+        objects[ghostIndex].visible = true;
+        characters[deathCharacter].visible = true;
+        characters[lifeInDeathCharacter].visible = true;
+    }
+
+    bool Scene::isGhostShipAlongside()
+    {
+        return ghostState == GhostState::Alongside;
+    }
+
+    void Scene::dismissGhostShip()
+    {
+        if(ghostState == GhostState::Alongside || ghostState == GhostState::Approaching)
+        {
+            ghostState = GhostState::Leaving;
+            ghostTime = 0.0f;
+            ghostStart = objects[ghostIndex].position;
+        }
+    }
+
+    void Scene::updateGhostShip(float deltaTime)
+    {
+        if(ghostState == GhostState::Hidden)
+            return;
+
+        ghostTime += deltaTime;
+        SceneObject& spectre = objects[ghostIndex];
+        spectre.rotationDegrees = glm::vec3(0.0f, ghostYaw, 0.0f);
+
+        float yaw = glm::radians(ghostYaw);
+        glm::vec3 bow = glm::vec3(std::sin(yaw), 0.0f, std::cos(yaw));
+        float bob = 0.15f * std::sin(ghostTime * 0.7f);
+
+        if(ghostState == GhostState::Approaching)
+        {
+            float progress = glm::clamp(ghostTime / GHOST_APPROACH_TIME, 0.0f, 1.0f);
+            spectre.position = glm::mix(ghostStart, ghostEnd, glm::smoothstep(0.0f, 1.0f, progress));
+            ghostFade = glm::smoothstep(0.0f, 0.35f, progress);
+            if(progress >= 1.0f)
+                ghostState = GhostState::Alongside;
+        }
+        else if(ghostState == GhostState::Alongside)
+        {
+            spectre.position = ghostEnd;
+            ghostFade = 1.0f;
+        }
+        else
+        {
+            float progress = glm::clamp(ghostTime / GHOST_LEAVE_TIME, 0.0f, 1.0f);
+            spectre.position = ghostStart + bow * (progress * progress * 420.0f);
+            ghostFade = 1.0f - glm::smoothstep(0.35f, 1.0f, progress);
+            if(progress >= 1.0f)
+            {
+                ghostState = GhostState::Hidden;
+                for(SceneObject& object : objects)
+                {
+                    if(object.parent == ghostIndex)
+                        object.visible = false;
+                }
+                spectre.visible = false;
+                pointLights[ghostLight].color = glm::vec3(0.0f);
+                characters[deathCharacter].visible = false;
+                characters[lifeInDeathCharacter].visible = false;
+            }
+        }
+        spectre.position.y += bob;
+        pointLights[ghostLight].position = toWorld(spectre, GHOST_LIGHT);
+        pointLights[ghostLight].color = GHOST_LIGHT_COLOR * ghostFade;
+    }
+
+    void Scene::throwDice()
+    {
+        diceTime = 0.0f;
+        objects[diceIndex[0]].visible = true;
+        objects[diceIndex[1]].visible = true;
+    }
+
+    void Scene::updateDice(float deltaTime)
+    {
+        if(diceTime < 0.0f)
+            return;
+
+        diceTime += deltaTime;
+        float progress = glm::clamp(diceTime / DICE_FLIGHT_TIME, 0.0f, 1.0f);
+        float table = GHOST_DECK + SEAT_HEIGHT + DICE_HALF_SIZE;
+
+        for(int i = 0; i < 2; i++)
+        {
+            SceneObject& die = objects[diceIndex[i]];
+            glm::vec3 start = glm::vec3(0.55f, GHOST_DECK + 1.0f, 0.1f - 0.2f * i);
+            glm::vec3 end = glm::vec3(-0.08f + 0.17f * i, table, 0.12f - 0.22f * i);
+            die.position = glm::mix(start, end, progress);
+            die.position.y += 0.35f * std::sin(progress * glm::pi<float>()) * (1.0f - progress);
+
+            float spin = (1.0f - progress) * (1.0f - progress);
+            die.rotationDegrees = glm::vec3(720.0f * spin + 90.0f * i, 35.0f + 60.0f * i + 540.0f * spin, 540.0f * spin);
+        }
+    }
+
+    void Scene::lifeInDeathWins()
+    {
+        playAnimation(lifeInDeathCharacter, "yes", false, 0.4f);
+        characters[lifeInDeathCharacter].nextClip = "idle";
+    }
+
+    void Scene::crewCurse()
+    {
+        Character& mariner = characters[marinerCharacter];
+        for(int sailor : crewCharacters)
+        {
+            characters[sailor].targetYaw = yawTowards(characters[sailor], mariner.localPosition);
+            playAnimation(sailor, "idle", true, 0.6f);
+        }
+    }
+
+    void Scene::killCrew(float interval)
+    {
+        crewDeathInterval = interval;
+        crewDeathTimer = 0.0f;
+        crewDeaths = 0;
+    }
+
+    void Scene::updateCrewDeaths(float deltaTime)
+    {
+        if(crewDeathTimer < 0.0f)
+            return;
+
+        crewDeathTimer += deltaTime;
+        while(crewDeaths < (int)crewCharacters.size() && crewDeathTimer >= crewDeaths * crewDeathInterval)
+        {
+            int sailor = crewCharacters[crewDeaths];
+            playAnimation(sailor, "death", false, 0.2f);
+            glm::vec3 chest = characterHead(sailor) - glm::vec3(0.0f, 0.4f, 0.0f);
+            souls.push_back({chest, glm::vec3(0.0f), -SOUL_DELAY});
+            crewDeaths++;
+        }
+        if(crewDeaths >= (int)crewCharacters.size())
+            crewDeathTimer = -1.0f;
+    }
+
+    void Scene::updateSouls(float deltaTime)
+    {
+        glm::vec3 marinerHead = characterHead(marinerCharacter);
+        for(Soul& soul : souls)
+        {
+            soul.age += deltaTime;
+            if(soul.age < 0.0f)
+                continue;
+
+            glm::vec3 desired;
+            if(soul.age < 1.2f)
+                desired = glm::vec3(0.0f, 1.6f, 0.0f);
+            else if(soul.age < 2.6f)
+                desired = glm::normalize(marinerHead + glm::vec3(0.0f, 0.3f, 0.0f) - soul.position) * 8.0f;
+            else
+                desired = glm::normalize(soul.velocity + glm::vec3(0.0f, 0.8f, 0.0f)) * 14.0f;
+
+            soul.velocity = glm::mix(soul.velocity, desired, glm::min(1.0f, 3.0f * deltaTime));
+            soul.position += soul.velocity * deltaTime;
+        }
+
+        std::vector<Soul> alive;
+        for(Soul& soul : souls)
+        {
+            if(soul.age < SOUL_LIFETIME)
+                alive.push_back(soul);
+        }
+        souls = alive;
+    }
+
+    void Scene::marinerDespairs()
+    {
+        playAnimation(marinerCharacter, "grieve", true, 0.8f);
+    }
+
+    int Scene::getDeathCharacter()
+    {
+        return deathCharacter;
+    }
+
+    int Scene::getLifeInDeathCharacter()
+    {
+        return lifeInDeathCharacter;
+    }
+
+    glm::vec3 Scene::getGhostShipPoint(glm::vec3 localPoint)
+    {
+        return toWorld(objects[ghostIndex], localPoint);
+    }
+
+    glm::vec3 Scene::getDicePosition()
+    {
+        return toWorld(objects[diceIndex[0]], glm::vec3(0.0f));
+    }
+
+    void Scene::drawProps(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc)
+    {
+        GLint wingFlapLoc = glGetUniformLocation(shader.shaderProgram, "wingFlap");
+        for(Character& character : characters)
+        {
+            if(!character.visible)
+                continue;
+
+            for(Prop& prop : character.props)
+            {
+                if(!prop.visible)
+                    continue;
+
+                glm::mat4 model = characterMatrix(character) * character.animator.getBoneTransform(prop.bone) * prop.offset;
+                glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(model));
+                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+                glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+                glUniform1f(wingFlapLoc, prop.wingFlap);
+                prop.model->Draw(shader);
+            }
+        }
+    }
+
+    void Scene::drawGhosts(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition)
+    {
+        if(ghostState == GhostState::Hidden)
+            return;
+
+        uploadEnvironment(shader, cameraPosition);
+        GLuint program = shader.shaderProgram;
+        glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniform1f(glGetUniformLocation(program, "wingFlap"), 0.0f);
+        glUniform1f(glGetUniformLocation(program, "ghostFade"), ghostFade);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glDepthMask(GL_FALSE);
+
+        for(SceneObject& object : objects)
+        {
+            if(!object.visible || !object.ghost)
+                continue;
+
+            glm::mat4 model = objectMatrix(object);
+            glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(model));
+            glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix3fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
+            object.model->Draw(shader);
+        }
+
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+    }
+
+    void Scene::drawSouls(gps::Shader shader, glm::mat4 view, glm::mat4 projection, glm::vec3 cameraPosition)
+    {
+        std::vector<glm::vec4> points;
+        for(Soul& soul : souls)
+        {
+            if(soul.age < 0.0f)
+                continue;
+            float alpha = glm::smoothstep(0.0f, 0.5f, soul.age) * (1.0f - glm::smoothstep(SOUL_LIFETIME - 1.5f, SOUL_LIFETIME, soul.age));
+            points.push_back(glm::vec4(soul.position, alpha));
+        }
+        if(points.empty())
+            return;
+
+        uploadEnvironment(shader, cameraPosition);
+        GLuint program = shader.shaderProgram;
+        glUniformMatrix4fv(glGetUniformLocation(program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glDepthMask(GL_FALSE);
+
+        glBindVertexArray(soulVao);
+        glBindBuffer(GL_ARRAY_BUFFER, soulVbo);
+        glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec4), points.data(), GL_STREAM_DRAW);
+        glDrawArrays(GL_POINTS, 0, (GLsizei)points.size());
+        glBindVertexArray(0);
+
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+        glDisable(GL_PROGRAM_POINT_SIZE);
     }
 
     void Scene::placeObstacles()
@@ -307,6 +705,9 @@ namespace gps {
 
         pointLights.push_back({toWorld(objects[shipIndex], SHIP_LANTERN), glm::vec3(1.0f, 0.68f, 0.35f) * 3.0f, 1.0f, 0.12f, 0.03f});
         shipLanternLight = (int)pointLights.size() - 1;
+
+        pointLights.push_back({glm::vec3(0.0f, -100.0f, 0.0f), glm::vec3(0.0f), 1.0f, 0.2f, 0.08f});
+        ghostLight = (int)pointLights.size() - 1;
 
         beam.position = lamp;
         beam.color = glm::vec3(1.0f, 0.92f, 0.72f) * 3.5f;
@@ -519,7 +920,7 @@ namespace gps {
 
     glm::vec3 Scene::toShipLocal(glm::vec3 worldPoint)
     {
-        return glm::vec3(glm::inverse(objects[shipIndex].getModelMatrix()) * glm::vec4(worldPoint, 1.0f));
+        return glm::vec3(glm::inverse(objectMatrix(objects[shipIndex])) * glm::vec4(worldPoint, 1.0f));
     }
 
     float Scene::yawTowards(Character& character, glm::vec3 localTarget)
@@ -554,7 +955,7 @@ namespace gps {
 
         Character& mariner = characters[marinerCharacter];
         mariner.targetYaw = yawTowards(mariner, toShipLocal(objects[albatrossIndex].position));
-        mariner.propVisible = true;
+        mariner.props[0].visible = true;
         playAnimation(marinerCharacter, "aim", true, 0.4f);
         crossbowTimer = 0.0f;
         return true;
@@ -623,7 +1024,7 @@ namespace gps {
 
         if(crossbowTimer >= CROSSBOW_LOWER_TIME)
         {
-            mariner.propVisible = false;
+            mariner.props[0].visible = false;
             mariner.targetYaw = 0.0f;
             playAnimation(marinerCharacter, "helm", true, 0.8f);
             crossbowTimer = -1.0f;
@@ -694,9 +1095,24 @@ namespace gps {
         updateFloating();
         updateAlbatross(deltaTime);
         updateCrossbow(deltaTime);
+        updateGhostShip(deltaTime);
+        updateDice(deltaTime);
+        updateCrewDeaths(deltaTime);
         turnCharacters(deltaTime);
         for(Character& character : characters)
+        {
+            if(!character.nextClip.empty() && character.animator.isFinished())
+            {
+                character.animator.play(clips[character.nextClip].get(), true, 0.5f);
+                character.nextClip.clear();
+            }
             character.animator.update(deltaTime);
+        }
+        updateSouls(deltaTime);
+
+        float curseStep = 0.15f * deltaTime;
+        curse += glm::clamp(curseTarget - curse, -curseStep, curseStep);
+        water.setCurse(curse);
         wind.update(deltaTime, stormFactor);
         rain.update(deltaTime, wind.getVelocity(), glm::smoothstep(0.3f, 1.0f, stormFactor));
         lightning.update(deltaTime, stormFactor, cameraPosition, viewDirection);
@@ -735,11 +1151,11 @@ namespace gps {
 
         for(SceneObject& object : objects)
         {
-            if(!object.visible)
+            if(!object.visible || object.ghost)
                 continue;
             if(!includeLighthouse && object.model == &lighthouse)
                 continue;
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(object.getModelMatrix()));
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(objectMatrix(object)));
             glUniform1f(wingFlapLoc, object.wingFlap);
             object.model->Draw(depthShader);
         }
@@ -814,7 +1230,7 @@ namespace gps {
 
     glm::vec3 Scene::toWorld(SceneObject& object, glm::vec3 localPoint)
     {
-        return glm::vec3(object.getModelMatrix() * glm::vec4(localPoint, 1.0f));
+        return glm::vec3(objectMatrix(object) * glm::vec4(localPoint, 1.0f));
     }
 
     void Scene::draw(gps::Shader shader, GLint modelLoc, GLint normalMatrixLoc, GLint emissiveLoc)
@@ -824,10 +1240,10 @@ namespace gps {
 
         for(SceneObject& object : objects)
         {
-            if(!object.visible)
+            if(!object.visible || object.ghost)
                 continue;
 
-            glm::mat4 model = object.getModelMatrix();
+            glm::mat4 model = objectMatrix(object);
             glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(model));
 
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -837,18 +1253,8 @@ namespace gps {
             object.model->Draw(shader);
         }
 
-        glUniform1f(wingFlapLoc, 0.0f);
         glUniform1f(emissiveLoc, 0.0f);
-        for(Character& character : characters)
-        {
-            if(!character.visible || !character.propVisible || character.prop == nullptr)
-                continue;
-
-            glm::mat4 model = characterMatrix(character) * character.animator.getBoneTransform(character.propBone) * character.propOffset;
-            glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(model));
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-            character.prop->Draw(shader);
-        }
+        drawProps(shader, modelLoc, normalMatrixLoc);
+        glUniform1f(wingFlapLoc, 0.0f);
     }
 }

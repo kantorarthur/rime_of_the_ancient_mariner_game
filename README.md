@@ -27,6 +27,7 @@ Run the program from the project root, since the paths to `assets/` are relative
 | Mouse | look around the ship |
 | X | take up the cross-bow (when the story asks for it) |
 | C | switch between the ship and the free camera |
+| Enter | skip to the next verse |
 | W A S D, Space / Left Ctrl | move the free camera |
 | Left Shift (hold) | free camera 3× faster |
 | Tab | release / capture the mouse |

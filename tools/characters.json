@@ -82,5 +82,27 @@
   "female": false,
   "hands_texture": "skin_hands_male",
   "skin_texture": "skin_head_male"
+ },
+ {
+  "name": "death",
+  "outfit": "Male_Ranger",
+  "outfit_texture": "ranger_dark",
+  "hair": [],
+  "hair_texture": "hair_black",
+  "female": false,
+  "hands_texture": "skin_grey_hands",
+  "skin_texture": "skin_grey_male"
+ },
+ {
+  "name": "life_in_death",
+  "outfit": "Female_Peasant",
+  "outfit_texture": "peasant_1",
+  "hair": [
+   "Hair_Long"
+  ],
+  "hair_texture": "hair_gold",
+  "female": true,
+  "hands_texture": "skin_pale_female",
+  "skin_texture": "skin_pale_female"
  }
 ]

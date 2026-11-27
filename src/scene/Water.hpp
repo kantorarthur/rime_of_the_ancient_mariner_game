@@ -35,6 +35,7 @@ namespace gps {
 
         float heightAt(float x, float z);
         void addFoamCircle(glm::vec2 center, float radius, float width);
+        void setCurse(float value);
 
     private:
         GLuint vao = 0;
@@ -44,6 +45,7 @@ namespace gps {
 
         float time = 0.0f;
         float stormFactor = 0.0f;
+        float curse = 0.0f;
         Wave waves[WAVE_COUNT];
         std::vector<glm::vec4> foamCircles;
 

@@ -17,6 +17,7 @@ uniform samplerCube skybox;
 uniform vec3 cameraPosition;
 uniform float time;
 uniform float stormFactor;
+uniform float curse;
 uniform vec4 foamCircles[MAX_FOAM_CIRCLES];
 uniform int foamCircleCount;
 
@@ -111,6 +112,16 @@ void main()
 
     vec3 foamLight = moon.ambient * 4.0 + moon.color * moonLit * max(dot(normal, toMoon), 0.2) + cone * beamFalloff * beam.color * 0.6;
     color = mix(color, FOAM_COLOR * foamLight, foam);
+
+    if(curse > 0.0)
+    {
+        vec2 drift = vec2(time * 0.05, -time * 0.04);
+        float swirl = valueNoise(fWorldPosition.xz * 0.12 + drift) * valueNoise(fWorldPosition.xz * 0.5 - drift * 2.0);
+        float fire = smoothstep(0.3, 0.55, swirl) * (1.0 - smoothstep(40.0, 220.0, fDistance));
+        vec3 hue = mix(vec3(0.1, 0.9, 0.45), vec3(0.2, 0.45, 1.0), valueNoise(fWorldPosition.xz * 0.04 + vec2(time * 0.02)));
+        hue = mix(hue, vec3(0.9, 0.95, 1.0), smoothstep(0.5, 0.65, swirl) * 0.6);
+        color += hue * fire * curse * 0.3;
+    }
 
     vec3 horizonDirection = normalize(vec3(-viewDirection.x, 0.0, -viewDirection.z));
     vec3 horizon = texture(skybox, horizonDirection).rgb;

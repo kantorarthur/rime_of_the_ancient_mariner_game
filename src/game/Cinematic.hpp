@@ -11,7 +11,7 @@
 
 namespace gps {
 
-    enum class ShotFocus {Mariner, Albatross, AlbatrossFall, Crew, ShipBow, ShipWide};
+    enum class ShotFocus {Mariner, Albatross, AlbatrossFall, Crew, CrewFall, Person, ShipBow, ShipWide, GhostShip, GhostDeck, Dice};
 
     struct Shot
     {
@@ -36,6 +36,7 @@ namespace gps {
         glm::vec3 anchor = glm::vec3(0.0f);
 
         void frame(Shot& shot, gps::Camera& camera, gps::Scene& scene);
+        void framePerson(int character, float progress, glm::vec3& eye, glm::vec3& target, gps::Scene& scene);
         void startShot(gps::Scene& scene);
     };
 }

@@ -139,6 +139,7 @@ namespace gps {
         glUniform2f(glGetUniformLocation(program, "gridCenter"), std::floor(cameraPosition.x), std::floor(cameraPosition.z));
         glUniform1f(glGetUniformLocation(program, "time"), time);
         glUniform1f(glGetUniformLocation(program, "stormFactor"), stormFactor);
+        glUniform1f(glGetUniformLocation(program, "curse"), curse);
         glUniform3f(glGetUniformLocation(program, "shelter"), SHELTER_START, SHELTER_END, SHELTER_MINIMUM);
 
         for(int i = 0; i < WAVE_COUNT; i++)
@@ -161,6 +162,11 @@ namespace gps {
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+    }
+
+    void Water::setCurse(float value)
+    {
+        curse = value;
     }
 
     Water::~Water()
